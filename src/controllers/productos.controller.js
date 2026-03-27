@@ -1,74 +1,85 @@
-const productos = require('../data/productos.data');
-//- `req` → todo lo que manda el cliente (URL, body, headers, etc.)
-//- `res` → lo que vos le devolvés al cliente
-const obtenerProductos = (req, res) => {
-  res.json(productos);
-};
+const Producto = require('../models/producto.model');
 
-const obtenerProductoPorId = (req, res) => {
-  const id = parseInt(req.params.id); //convierte a numero entero el id 
-  // para comparar
-
-  const producto = productos.find(p => p.id === id); //Busca dentro del array el 
-  // primer producto cuyo `id` coincida con el que llegó en la URL. 
-  // Si no encuentra ninguno, devuelve `undefined`.
-
-  if (!producto) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
+// GET /api/productos
+const obtenerProductos = async (req, res) => {
+  try {
+    const productos = await Producto.find({ activo: true });
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener productos' });
   }
-
-  res.json(producto); //Si sí lo encontró, responde con el producto y status **200**.
 };
 
-const eliminarProducto = (req, res) => {
-  const id = parseInt(req.params.id); //convierto a numero int el ID de URL
-  const index = productos.findIndex(p => p.id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
+// GET /api/productos/:id
+const obtenerProductoPorId = async (req, res) => {
+  try {
+    const producto = await Producto.findById(req.params.id);
+    if (!producto) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    res.json(producto);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al buscar el producto' });
   }
-  productos.splice(index, 1);
-  res.json({ mensaje: 'Producto eliminado correctamente' });
 };
 
-const crearProducto = (req, res) => {
-  const { nombre, precio } = req.body;
+// POST /api/productos
+const crearProducto = async (req, res) => {
+  try {
+    const { nombre, precio, stock, categoria, descripcion, imagenes } = req.body;
 
-  if (!nombre || !precio) { // !nombre or !precio- si falta uno u otro
-    return res.status(400).json({ error: 'Nombre y precio son obligatorios' });
+    if (!nombre || !precio || !categoria) {
+      return res.status(400).json({ error: 'Nombre, precio y categoría son obligatorios' });
+    }
+
+    const nuevoProducto = new Producto({ nombre, precio, stock, categoria, descripcion, imagenes });
+    await nuevoProducto.save();
+
+    res.status(201).json(nuevoProducto);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear el producto' });
   }
-
-  const nuevoProducto = { //genera el producto+1 de id
-    id: productos.length + 1,
-    nombre,
-    precio
-  };
-  productos.push(nuevoProducto);
-
-  res.status(201).json(nuevoProducto); //201 → algo fue creado exitosamente
 };
 
-const actualizarProducto = (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = productos.findIndex(p => p.id === id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
+// PUT /api/productos/:id
+const actualizarProducto = async (req, res) => {
+  try {
+    const producto = await Producto.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!producto) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    res.json(producto);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al actualizar el producto' });
   }
-  const { nombre, precio } = req.body;
-  productos[index] = {
-    ...productos[index],
-    nombre: nombre || productos[index].nombre,
-    precio: precio || productos[index].precio
-  };
-  res.json(productos[index]);
 };
 
-
-
+// DELETE /api/productos/:id
+const eliminarProducto = async (req, res) => {
+  try {
+    const producto = await Producto.findByIdAndUpdate(
+      req.params.id,
+      { activo: false },
+      { new: true }
+    );
+    if (!producto) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    res.json({ mensaje: 'Producto eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el producto' });
+  }
+};
 
 module.exports = {
   obtenerProductos,
   obtenerProductoPorId,
   crearProducto,
-  eliminarProducto,
-  actualizarProducto
-};
+  actualizarProducto,
+  eliminarProducto
+}
+;

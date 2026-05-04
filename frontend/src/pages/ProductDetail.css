@@ -1,0 +1,30 @@
+.product-detail {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.detail-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.detail-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 1rem 0;
+}
+
+.detail-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c5282;
+}
+
+.detail-stock, .detail-category {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+}

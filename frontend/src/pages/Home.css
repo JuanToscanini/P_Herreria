@@ -1,14 +1,70 @@
 .home {
-  padding: 4rem 2rem;
   text-align: center;
 }
 
-.home h1 {
-  font-size: 2.5rem;
+.home-hero {
+  padding: 5rem 2rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.home-subtitulo {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: #999;
+  text-transform: uppercase;
   margin-bottom: 1rem;
 }
 
-.home p {
-  font-size: 1.2rem;
+.home h1 {
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #111;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+}
+
+.home-descripcion {
   color: #666;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-btn {
+  display: inline-block;
+  background: #333;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.home-btn:hover {
+  background: #111;
+}
+
+.home-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 3rem 2rem;
+  gap: 2rem;
+}
+
+.home-stat {
+  text-align: center;
+}
+
+.stat-numero {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #999;
 }

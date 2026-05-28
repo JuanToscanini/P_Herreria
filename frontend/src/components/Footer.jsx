@@ -1,9 +1,9 @@
 import './Footer.css'
 
-function Footer() {
+function Footer({ empresa, anio }) {
   return (
     <footer className="footer">
-      <p>© 2026 Herrería Ledesma - Todos los derechos reservados</p>
+      <p>© {anio} {empresa} - Todos los derechos reservados</p>
     </footer>
   )
 }

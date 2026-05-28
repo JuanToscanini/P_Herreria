@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import ProductCard from '../components/ProductCard'
 import api from '../api/axiosConfig'
 import './ProductList.css'
+import Spinner from '../components/Spinner'
+
 
 function ProductList() {
   const [productos, setProductos] = useState([])
@@ -22,15 +24,22 @@ function ProductList() {
     fetchProductos()
   }, [])
 
-  if (loading) return <p className="loading">Cargando productos...</p>
-  if (error) return <p className="error">{error}</p>
+if (loading) return <Spinner mensaje="Cargando productos..." />
+  if (error) return <Spinner mensaje="Error al cargar los productos" />
 
   return (
     <div className="product-list">
       <h1>Productos</h1>
       <div className="products-grid">
         {productos.map(producto => (
-          <ProductCard key={producto._id} producto={producto} />
+          <ProductCard
+            key={producto._id}
+            id={producto._id}
+            nombre={producto.nombre}
+            categoria={producto.categoria}
+            precio={producto.precio}
+            imagenes={producto.imagenes}
+          />
         ))}
       </div>
     </div>

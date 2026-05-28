@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/axiosConfig'
+import Spinner from '../components/Spinner'
 import './ProductDetail.css'
 
 function ProductDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [producto, setProducto] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -23,12 +25,15 @@ function ProductDetail() {
     fetchProducto()
   }, [id])
 
-  if (loading) return <p className="loading">Cargando...</p>
-  if (error) return <p className="error">{error}</p>
+  if (loading) return <Spinner mensaje="Cargando producto..." />
+  if (error) return <Spinner mensaje="Error al cargar el producto" />
   if (!producto) return <p>Producto no encontrado</p>
 
   return (
     <div className="product-detail">
+      <button className="detail-back" onClick={() => navigate(-1)}>
+        ← Volver
+      </button>
       <h1>{producto.nombre}</h1>
       {producto.imagenes && producto.imagenes.length > 0 && (
         <img src={producto.imagenes[0]} alt={producto.nombre} className="detail-image" />

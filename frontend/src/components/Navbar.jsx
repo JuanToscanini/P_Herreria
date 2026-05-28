@@ -1,17 +1,22 @@
 import { Link } from 'react-router-dom'
 import './Navbar.css'
 
-function Navbar() {
+function Navbar({ titulo, links, cantidadCarrito }) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">Herrería Ledesma</Link>
+        <Link to="/">{titulo}</Link>
       </div>
       <ul className="navbar-links">
-        <li><Link to="/">Inicio</Link></li>
-        <li><Link to="/productos">Productos</Link></li>
-        <li><Link to="/contacto">Contacto</Link></li>
+        {links.map((link, index) => (
+          <li key={index}>
+            <Link to={link.ruta}>{link.nombre}</Link>
+          </li>
+        ))}
       </ul>
+      <div className="navbar-cart">
+        🛒 {cantidadCarrito}
+      </div>
     </nav>
   )
 }

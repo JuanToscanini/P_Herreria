@@ -6,6 +6,7 @@ const usuarioSchema = new mongoose.Schema({
   contrasena: { type: String, required: true },
   telefono: { type: String, default: '' },
   rol: { type: String, enum: ['cliente', 'admin'], default: 'cliente' },
+  activo: { type: Boolean, default: true },
   carritoActivo: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrito' }
 }, { timestamps: true });
 

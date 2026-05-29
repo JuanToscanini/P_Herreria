@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { verificarToken, soloAdmin } = require('../middlewares/auth.middleware');
 
 const {
   obtenerProductos,
@@ -8,11 +9,14 @@ const {
   eliminarProducto,
   actualizarProducto  
 } = require('../controllers/productos.controller'); 
-//llamo productos de productos.controller.js
-//para luego usarlos con el router
+
+// rutas públicas
 router.get('/', obtenerProductos);
 router.get('/:id', obtenerProductoPorId);
-router.post('/', crearProducto);
-router.delete('/:id', eliminarProducto); 
-router.put('/:id', actualizarProducto);
+
+// rutas protegidas - solo admin
+router.post('/', verificarToken, soloAdmin, crearProducto);
+router.delete('/:id', verificarToken, soloAdmin, eliminarProducto); 
+router.put('/:id', verificarToken, soloAdmin, actualizarProducto);
+
 module.exports = router;

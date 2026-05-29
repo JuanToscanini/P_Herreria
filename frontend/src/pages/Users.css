@@ -1,0 +1,87 @@
+.users {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.users h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  margin-bottom: 3rem;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  background: #333;
+  color: white;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 500;
+}
+
+.users-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+
+.users-table tr:hover td {
+  background: #f9f9f9;
+}
+
+.users-form {
+  max-width: 400px;
+}
+
+.users-form h2 {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 1.5rem;
+}
+
+.users-form button {
+  width: 100%;
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.users-form button:hover {
+  background: #111;
+}
+
+.users-form button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.form-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.users-form select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  outline: none;
+  width: 100%;
+}

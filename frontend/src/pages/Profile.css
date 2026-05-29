@@ -1,0 +1,61 @@
+.profile {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.profile-box {
+  width: 100%;
+  max-width: 450px;
+}
+
+.profile-box h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+}
+
+.profile-divider {
+  border-top: 1px solid #f0f0f0;
+  margin: 1.5rem 0;
+}
+
+.profile-divider p {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 1rem;
+}
+
+.profile-box button {
+  width: 100%;
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.profile-box button:hover {
+  background: #111;
+}
+
+.profile-box button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.profile-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.profile-success {
+  color: #27ae60;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}

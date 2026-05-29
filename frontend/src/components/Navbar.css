@@ -33,3 +33,72 @@
 .navbar-links a:hover {
   color: #ddd;
 }
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-cart {
+  color: white;
+  font-size: 1.1rem;
+}
+
+.navbar-user {
+  position: relative;
+}
+
+.navbar-user-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.navbar-dropdown {
+  position: absolute;
+  right: 0;
+  top: 2rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.75rem;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 100;
+}
+
+.dropdown-nombre {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.navbar-dropdown a {
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.navbar-dropdown a:hover {
+  color: #111;
+}
+
+.navbar-dropdown button {
+  background: none;
+  border: none;
+  color: #c0392b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.navbar-dropdown button:hover {
+  color: #922b21;
+}

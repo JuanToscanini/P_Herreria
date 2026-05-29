@@ -25,6 +25,8 @@ function ProductDetail() {
     fetchProducto()
   }, [id])
 
+  const usuario = JSON.parse(localStorage.getItem('usuario'))
+
   if (loading) return <Spinner mensaje="Cargando producto..." />
   if (error) return <Spinner mensaje="Error al cargar el producto" />
   if (!producto) return <p>Producto no encontrado</p>
@@ -34,6 +36,14 @@ function ProductDetail() {
       <button className="detail-back" onClick={() => navigate(-1)}>
         ← Volver
       </button>
+      {usuario?.rol === 'admin' && (
+        <button
+          className="detail-edit"
+          onClick={() => navigate(`/productos/editar/${id}`)}
+        >
+          Editar producto
+        </button>
+      )}
       <h1>{producto.nombre}</h1>
       {producto.imagenes && producto.imagenes.length > 0 && (
         <img src={producto.imagenes[0]} alt={producto.nombre} className="detail-image" />

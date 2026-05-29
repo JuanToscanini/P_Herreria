@@ -11,15 +11,12 @@ const registrar = async (req, res) => {
       return res.status(400).json({ error: 'Nombre, email y contraseña son obligatorios' });
     }
 
-    // Verificar si el email ya existe
     const usuarioExistente = await Usuario.findOne({ email });
     if (usuarioExistente) {
       return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
     }
 
-    // Encriptar contraseña
     const hash = await bcrypt.hash(contrasena, 10);
-
     const nuevoUsuario = new Usuario({ nombre, email, contrasena: hash, telefono });
     await nuevoUsuario.save();
 
@@ -38,19 +35,20 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
 
-    // Buscar usuario por email
     const usuario = await Usuario.findOne({ email });
     if (!usuario) {
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
-    // Verificar contraseña
+    if (!usuario.activo) {
+      return res.status(401).json({ error: 'Usuario desactivado' });
+    }
+
     const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!contrasenaValida) {
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
-    // Generar token JWT
     const token = jwt.sign(
       { id: usuario._id, rol: usuario.rol },
       process.env.JWT_SECRET,
@@ -71,8 +69,8 @@ const login = async (req, res) => {
   }
 };
 
-// GET /api/usuarios/perfil
-const obtenerPerfil = async (req, res) => {
+// GET /api/usuarios/me
+const obtenerMiPerfil = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.usuario.id).select('-contrasena');
     res.json(usuario);
@@ -81,4 +79,9 @@ const obtenerPerfil = async (req, res) => {
   }
 };
 
-module.exports = { registrar, login, obtenerPerfil };
+// PUT /api/usuarios/me
+const actualizarMiPerfil = async (req, res) => {
+  try {
+    const { nombre, email, telefono, contrasenaActual, nuevaContrasena } = req.body;
+
+    const usuario = await U

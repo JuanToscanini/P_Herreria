@@ -42,3 +42,18 @@
   font-size: 1.1rem;
   margin: 0.5rem 0;
 }
+
+.detail-edit {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+.detail-edit:hover {
+  background: #111;
+}

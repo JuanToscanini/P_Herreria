@@ -31,7 +31,7 @@ function App() {
       />
       <main className="main-content">
         <Routes>
-          / rutas públicas
+          {/* rutas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Register />} />
@@ -48,12 +48,11 @@ function App() {
 
 
 
-          / ruta 404
+          {/* ruta 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer empresa="Herrería Ledesma" anio={2026} />
-      <Footer />
 
     </div>
   )

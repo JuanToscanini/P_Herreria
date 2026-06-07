@@ -1,0 +1,58 @@
+.new-product {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.new-product-box {
+  width: 100%;
+  max-width: 500px;
+}
+
+.new-product-box h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+}
+
+.new-product-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.new-product-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+}
+
+.new-product-actions button[type="submit"] {
+  background: #333;
+  color: white;
+}
+
+.new-product-actions button[type="submit"]:hover {
+  background: #111;
+}
+
+.new-product-actions button[type="submit"]:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.new-product-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.optional {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 400;
+}

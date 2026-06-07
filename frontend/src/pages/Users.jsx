@@ -6,7 +6,8 @@ import './Users.css'
 
 function Users() {
   const navigate = useNavigate()
-  const [usuarios, setUsuarios] = useState([])
+  const [activos, setActivos] = useState([])
+  const [inactivos, setInactivos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [form, setForm] = useState({
@@ -33,11 +34,24 @@ function Users() {
       const response = await api.get('/usuarios', {
         headers: { Authorization: `Bearer ${token}` }
       })
-      setUsuarios(response.data)
+      setActivos(response.data.filter(u => u.activo))
+      setInactivos(response.data.filter(u => !u.activo))
     } catch (err) {
       setError('Error al cargar los usuarios')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const reactivarUsuario = async (id) => {
+    try {
+      const token = localStorage.getItem('token')
+      await api.put(`/usuarios/${id}`, { activo: true }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      fetchUsuarios()
+    } catch (err) {
+      setError('Error al reactivar el usuario')
     }
   }
 
@@ -84,20 +98,61 @@ function Users() {
               <th>Email</th>
               <th>Rol</th>
               <th>Estado</th>
+              <th>Editar</th>
             </tr>
           </thead>
           <tbody>
-            {usuarios.map(usuario => (
+            {activos.map(usuario => (
               <tr key={usuario._id}>
                 <td>{usuario.nombre}</td>
                 <td>{usuario.email}</td>
                 <td>{usuario.rol}</td>
-                <td>{usuario.activo ? 'Activo' : 'Inactivo'}</td>
+                <td>Activo</td>
+                <td>
+                  <button onClick={() => navigate(`/usuarios/editar/${usuario._id}`)}>
+                    Editar
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {inactivos.length > 0 && (
+        <div className="users-inactive">
+          <h2>Usuarios inactivos</h2>
+          <div className="users-table-container">
+            <table className="users-table users-table-inactive">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Reactivar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inactivos.map(usuario => (
+                  <tr key={usuario._id}>
+                    <td>{usuario.nombre}</td>
+                    <td>{usuario.email}</td>
+                    <td>{usuario.rol}</td>
+                    <td>
+                      <button
+                        className="btn-reactivar"
+                        onClick={() => reactivarUsuario(usuario._id)}
+                      >
+                        Reactivar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="users-form">
         <h2>Nuevo usuario</h2>

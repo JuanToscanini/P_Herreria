@@ -1,0 +1,76 @@
+.edit-user {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.edit-user-box {
+  width: 100%;
+  max-width: 500px;
+}
+
+.edit-user-box h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 2rem;
+}
+
+.form-group-checkbox {
+  margin-bottom: 1.25rem;
+}
+
+.form-group-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.optional {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.edit-user-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.edit-user-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+}
+
+.edit-user-actions button[type="submit"] {
+  background: #333;
+  color: white;
+}
+
+.edit-user-actions button[type="submit"]:hover {
+  background: #111;
+}
+
+.edit-user-actions button[type="submit"]:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.edit-user-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}

@@ -39,6 +39,35 @@
   background: #f9f9f9;
 }
 
+.users-inactive {
+  margin-bottom: 3rem;
+}
+
+.users-inactive h2 {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.users-table-inactive th {
+  background: #888;
+}
+
+.btn-reactivar {
+  padding: 0.35rem 0.8rem;
+  background: white;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-reactivar:hover {
+  background: #f0f0f0;
+}
+
 .users-form {
   max-width: 400px;
 }

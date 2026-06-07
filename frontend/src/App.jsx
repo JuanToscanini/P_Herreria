@@ -11,6 +11,8 @@ import Register from './pages/Register'
 import Users from './pages/Users'
 import Profile from './pages/Profile'
 import EditProduct from './pages/EditProduct'
+import EditUser from './pages/EditUser'
+import NewProduct from './pages/NewProduct'
 
 
 import './App.css'
@@ -37,6 +39,7 @@ function App() {
           <Route path="/registro" element={<Register />} />
           
           <Route path="/productos" element={<ProductList />} />
+          <Route path="/productos/nuevo" element={<NewProduct />} />
           <Route path="/productos/:id" element={<ProductDetail />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/productos/editar/:id" element={<EditProduct />} />
@@ -44,6 +47,7 @@ function App() {
 
           <Route path="/contacto" element={<Contact />} />
           <Route path="/usuarios" element={<Users />} />
+          <Route path="/usuarios/editar/:id" element={<EditUser />} />
    
 
 

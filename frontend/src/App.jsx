@@ -14,7 +14,6 @@ import EditProduct from './pages/EditProduct'
 import EditUser from './pages/EditUser'
 import NewProduct from './pages/NewProduct'
 
-
 import './App.css'
 
 const links = [
@@ -37,27 +36,22 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Register />} />
-          
+
           <Route path="/productos" element={<ProductList />} />
           <Route path="/productos/nuevo" element={<NewProduct />} />
           <Route path="/productos/:id" element={<ProductDetail />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/productos/editar/:id" element={<EditProduct />} />
 
-
           <Route path="/contacto" element={<Contact />} />
           <Route path="/usuarios" element={<Users />} />
           <Route path="/usuarios/editar/:id" element={<EditUser />} />
-   
-
-
 
           {/* ruta 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer empresa="Herrería Ledesma" anio={2026} />
-
     </div>
   )
 }

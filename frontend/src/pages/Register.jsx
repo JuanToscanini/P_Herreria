@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import './Register.css'
 
@@ -11,7 +12,6 @@ function Register() {
     contrasena: '',
     telefono: ''
   })
-  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
@@ -20,19 +20,19 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
 
     if (!form.nombre || !form.email || !form.contrasena) {
-      setError('Nombre, email y contraseña son obligatorios')
+      toast.error('Nombre, email y contraseña son obligatorios')
       return
     }
 
     setLoading(true)
     try {
       await api.post('/usuarios/registro', form)
+      toast.success('Cuenta creada correctamente. Iniciá sesión')
       navigate('/login')
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al registrarse')
+      toast.error(err.response?.data?.error || 'Error al registrarse')
     } finally {
       setLoading(false)
     }
@@ -42,7 +42,6 @@ function Register() {
     <div className="register">
       <div className="register-box">
         <h1>Crear cuenta</h1>
-        {error && <p className="register-error">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Nombre</label>

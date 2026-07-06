@@ -68,9 +68,3 @@
   background: #999;
   cursor: not-allowed;
 }
-
-.edit-user-error {
-  color: #c0392b;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}

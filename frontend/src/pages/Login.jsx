@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import './Login.css'
 
 function Login() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', contrasena: '' })
-  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
@@ -15,10 +15,9 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
 
     if (!form.email || !form.contrasena) {
-      setError('Email y contraseña son obligatorios')
+      toast.error('Email y contraseña son obligatorios')
       return
     }
 
@@ -27,9 +26,10 @@ function Login() {
       const response = await api.post('/usuarios/login', form)
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('usuario', JSON.stringify(response.data.usuario))
+      toast.success(`Bienvenido, ${response.data.usuario.nombre}`)
       navigate('/productos')
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión')
+      toast.error(err.response?.data?.error || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
@@ -39,7 +39,6 @@ function Login() {
     <div className="login">
       <div className="login-box">
         <h1>Iniciar sesión</h1>
-        {error && <p className="login-error">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>

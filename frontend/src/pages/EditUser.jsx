@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import Spinner from '../components/Spinner'
 import './EditUser.css'
@@ -8,7 +9,6 @@ function EditUser() {
   const navigate = useNavigate()
   const { id } = useParams()
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [loadingForm, setLoadingForm] = useState(false)
   const [form, setForm] = useState({
     nombre: '',
@@ -36,7 +36,8 @@ function EditUser() {
       const { nombre, email, rol, activo } = response.data
       setForm({ nombre, email, contrasena: '', rol, activo })
     } catch (err) {
-      setError('Error al cargar el usuario')
+      toast.error('Error al cargar el usuario')
+      navigate('/usuarios')
     } finally {
       setLoading(false)
     }
@@ -49,10 +50,9 @@ function EditUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
 
     if (!form.nombre || !form.email) {
-      setError('Nombre y email son obligatorios')
+      toast.error('Nombre y email son obligatorios')
       return
     }
 
@@ -67,9 +67,10 @@ function EditUser() {
       await api.put(`/usuarios/${id}`, body, {
         headers: { Authorization: `Bearer ${token}` }
       })
+      toast.success('Usuario actualizado correctamente')
       navigate('/usuarios')
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al actualizar el usuario')
+      toast.error(err.response?.data?.error || 'Error al actualizar el usuario')
     } finally {
       setLoadingForm(false)
     }
@@ -81,7 +82,6 @@ function EditUser() {
     <div className="edit-user">
       <div className="edit-user-box">
         <h1>Editar usuario</h1>
-        {error && <p className="edit-user-error">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Nombre</label>

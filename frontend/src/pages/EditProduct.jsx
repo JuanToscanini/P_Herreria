@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import Spinner from '../components/Spinner'
 import './EditProduct.css'
@@ -8,7 +9,6 @@ function EditProduct() {
   const navigate = useNavigate()
   const { id } = useParams()
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [loadingForm, setLoadingForm] = useState(false)
   const [form, setForm] = useState({
     nombre: '',
@@ -33,7 +33,8 @@ function EditProduct() {
       const { nombre, descripcion, precio, stock, categoria } = response.data
       setForm({ nombre, descripcion, precio, stock, categoria })
     } catch (err) {
-      setError('Error al cargar el producto')
+      toast.error('Error al cargar el producto')
+      navigate('/productos')
     } finally {
       setLoading(false)
     }
@@ -45,10 +46,9 @@ function EditProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
 
     if (!form.nombre || !form.precio || !form.stock) {
-      setError('Nombre, precio y stock son obligatorios')
+      toast.error('Nombre, precio y stock son obligatorios')
       return
     }
 
@@ -58,9 +58,10 @@ function EditProduct() {
       await api.put(`/productos/${id}`, form, {
         headers: { Authorization: `Bearer ${token}` }
       })
+      toast.success('Producto actualizado correctamente')
       navigate('/productos')
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al actualizar el producto')
+      toast.error(err.response?.data?.error || 'Error al actualizar el producto')
     } finally {
       setLoadingForm(false)
     }
@@ -72,7 +73,6 @@ function EditProduct() {
     <div className="edit-product">
       <div className="edit-product-box">
         <h1>Editar producto</h1>
-        {error && <p className="edit-error">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Nombre</label>

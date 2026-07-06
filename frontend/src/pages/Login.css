@@ -64,13 +64,6 @@
   cursor: not-allowed;
 }
 
-.login-error {
-  color: #c0392b;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
 .login-register {
   text-align: center;
   margin-top: 1.5rem;

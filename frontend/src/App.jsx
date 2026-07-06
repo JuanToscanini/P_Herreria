@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -32,7 +34,6 @@ function App() {
       />
       <main className="main-content">
         <Routes>
-          {/* rutas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Register />} />
@@ -47,11 +48,11 @@ function App() {
           <Route path="/usuarios" element={<Users />} />
           <Route path="/usuarios/editar/:id" element={<EditUser />} />
 
-          {/* ruta 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer empresa="Herrería Ledesma" anio={2026} />
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   )
 }

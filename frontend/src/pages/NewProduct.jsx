@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import './NewProduct.css'
 
 function NewProduct() {
   const navigate = useNavigate()
-  const [error, setError] = useState(null)
   const [loadingForm, setLoadingForm] = useState(false)
   const [form, setForm] = useState({
     nombre: '',
@@ -29,10 +29,9 @@ function NewProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
 
     if (!form.nombre || !form.precio || !form.stock) {
-      setError('Nombre, precio y stock son obligatorios')
+      toast.error('Nombre, precio y stock son obligatorios')
       return
     }
 
@@ -53,9 +52,10 @@ function NewProduct() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
+      toast.success('Producto creado correctamente')
       navigate('/productos')
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al crear el producto')
+      toast.error(err.response?.data?.error || 'Error al crear el producto')
     } finally {
       setLoadingForm(false)
     }
@@ -65,7 +65,6 @@ function NewProduct() {
     <div className="new-product">
       <div className="new-product-box">
         <h1>Nuevo producto</h1>
-        {error && <p className="new-product-error">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Nombre</label>

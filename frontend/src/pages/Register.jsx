@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import './Register.css'
 
 function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [form, setForm] = useState({
     nombre: '',
     email: '',
@@ -13,6 +14,8 @@ function Register() {
     telefono: ''
   })
   const [loading, setLoading] = useState(false)
+
+  const redirect = searchParams.get('redirect') || '/productos'
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -30,7 +33,7 @@ function Register() {
     try {
       await api.post('/usuarios/registro', form)
       toast.success('Cuenta creada correctamente. Iniciá sesión')
-      navigate('/login')
+      navigate(`/login${redirect !== '/productos' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`)
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al registrarse')
     } finally {
@@ -88,7 +91,10 @@ function Register() {
           </button>
         </form>
         <p className="register-login">
-          ¿Ya tenés cuenta? <Link to="/login">Iniciá sesión</Link>
+          ¿Ya tenés cuenta?{' '}
+          <Link to={`/login${redirect !== '/productos' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}>
+            Iniciá sesión
+          </Link>
         </p>
       </div>
     </div>

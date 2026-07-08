@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
 import './Login.css'
 
 function Login() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [form, setForm] = useState({ email: '', contrasena: '' })
   const [loading, setLoading] = useState(false)
+
+  const redirect = searchParams.get('redirect') || '/productos'
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -27,7 +30,9 @@ function Login() {
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('usuario', JSON.stringify(response.data.usuario))
       toast.success(`Bienvenido, ${response.data.usuario.nombre}`)
-      navigate('/productos')
+      navigate(redirect)
+      // Recargar la página para que el Navbar actualice el estado del usuario
+      window.location.reload()
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al iniciar sesión')
     } finally {
@@ -64,8 +69,16 @@ function Login() {
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
+        <p className="login-forgot">
+          <Link to={`/forgot-password${redirect !== '/productos' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}>
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </p>
         <p className="login-register">
-          ¿No tenés cuenta? <Link to="/registro">Registrate</Link>
+          ¿No tenés cuenta?{' '}
+          <Link to={`/registro${redirect !== '/productos' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}>
+            Registrate
+          </Link>
         </p>
       </div>
     </div>

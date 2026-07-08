@@ -7,7 +7,9 @@ const usuarioSchema = new mongoose.Schema({
   telefono: { type: String, default: '' },
   rol: { type: String, enum: ['cliente', 'admin'], default: 'cliente' },
   activo: { type: Boolean, default: true },
-  carritoActivo: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrito' }
+  carritoActivo: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrito' },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);

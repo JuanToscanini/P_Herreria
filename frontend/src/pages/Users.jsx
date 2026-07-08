@@ -19,12 +19,15 @@ function Users() {
   const [errorForm, setErrorForm] = useState(null)
   const [loadingForm, setLoadingForm] = useState(false)
 
+  const [usuarioActual, setUsuarioActual] = useState(null)
+
   useEffect(() => {
     const usuario = JSON.parse(localStorage.getItem('usuario'))
     if (!usuario || usuario.rol !== 'admin') {
       navigate('/productos')
       return
     }
+    setUsuarioActual(usuario)
     fetchUsuarios()
   }, [])
 
@@ -52,6 +55,30 @@ function Users() {
       fetchUsuarios()
     } catch (err) {
       setError('Error al reactivar el usuario')
+    }
+  }
+
+  const handleCambiarRol = async (id, nuevoRol) => {
+    try {
+      const token = localStorage.getItem('token')
+      await api.put(`/usuarios/${id}`, { rol: nuevoRol }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      fetchUsuarios()
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al cambiar el rol')
+    }
+  }
+
+  const handleToggleEstado = async (id, activoActual) => {
+    try {
+      const token = localStorage.getItem('token')
+      await api.put(`/usuarios/${id}`, { activo: !activoActual }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      fetchUsuarios()
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al cambiar el estado')
     }
   }
 
@@ -98,7 +125,7 @@ function Users() {
               <th>Email</th>
               <th>Rol</th>
               <th>Estado</th>
-              <th>Editar</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -106,11 +133,31 @@ function Users() {
               <tr key={usuario._id}>
                 <td>{usuario.nombre}</td>
                 <td>{usuario.email}</td>
-                <td>{usuario.rol}</td>
-                <td>Activo</td>
                 <td>
-                  <button onClick={() => navigate(`/usuarios/editar/${usuario._id}`)}>
+                  <select
+                    className="user-role-select"
+                    value={usuario.rol}
+                    onChange={(e) => handleCambiarRol(usuario._id, e.target.value)}
+                    disabled={usuario._id === usuarioActual?.id}
+                  >
+                    <option value="cliente">Cliente</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </td>
+                <td>{usuario.activo ? 'Activo' : 'Inactivo'}</td>
+                <td>
+                  <button
+                    className="btn-edit"
+                    onClick={() => navigate(`/usuarios/editar/${usuario._id}`)}
+                  >
                     Editar
+                  </button>
+                  <button
+                    className={`btn-status-toggle ${usuario.activo ? 'desactivar' : 'activar'}`}
+                    onClick={() => handleToggleEstado(usuario._id, usuario.activo)}
+                    disabled={usuario._id === usuarioActual?.id}
+                  >
+                    {usuario.activo ? 'Desactivar' : 'Activar'}
                   </button>
                 </td>
               </tr>

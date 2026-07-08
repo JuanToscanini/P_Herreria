@@ -7,7 +7,7 @@
 .users h1 {
   font-size: 1.8rem;
   font-weight: 500;
-  color: #111;
+  color: var(--text-h);
   margin-bottom: 2rem;
 }
 
@@ -22,21 +22,22 @@
 }
 
 .users-table th {
-  background: #333;
-  color: white;
+  background: var(--code-bg);
+  color: var(--text-h);
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 500;
+  border-bottom: 2px solid var(--border);
 }
 
 .users-table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  color: #333;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
 }
 
 .users-table tr:hover td {
-  background: #f9f9f9;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .users-inactive {
@@ -75,15 +76,15 @@
 .users-form h2 {
   font-size: 1.3rem;
   font-weight: 500;
-  color: #111;
+  color: var(--text-h);
   margin-bottom: 1.5rem;
 }
 
 .users-form button {
   width: 100%;
-  background: #333;
-  color: white;
-  border: none;
+  background: var(--text-h);
+  color: var(--bg);
+  border: 1px solid var(--border);
   padding: 0.75rem;
   border-radius: 4px;
   font-size: 0.95rem;
@@ -92,11 +93,13 @@
 }
 
 .users-form button:hover {
-  background: #111;
+  background: var(--text);
+  color: var(--bg);
 }
 
 .users-form button:disabled {
-  background: #999;
+  background: var(--border);
+  color: var(--text);
   cursor: not-allowed;
 }
 
@@ -108,9 +111,84 @@
 
 .users-form select {
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 0.95rem;
   outline: none;
   width: 100%;
+  background-color: var(--bg);
+  color: var(--text-h);
+}
+
+.user-role-select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  outline: none;
+  background-color: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.user-role-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-status-toggle {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-status-toggle.desactivar {
+  background-color: rgba(192, 57, 43, 0.15);
+  color: #e74c3c;
+  border-color: rgba(192, 57, 43, 0.3);
+}
+
+.btn-status-toggle.desactivar:hover:not(:disabled) {
+  background-color: #c0392b;
+  color: white;
+}
+
+.btn-status-toggle.activar {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: #2ecc71;
+  border-color: rgba(39, 174, 96, 0.3);
+}
+
+.btn-status-toggle.activar:hover:not(:disabled) {
+  background-color: #27ae60;
+  color: white;
+}
+
+.btn-status-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--border);
+  color: var(--text);
+  border-color: transparent;
+}
+
+.btn-edit {
+  padding: 0.35rem 0.75rem;
+  background-color: var(--code-bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-edit:hover {
+  background-color: var(--border);
 }

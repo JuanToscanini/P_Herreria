@@ -12,7 +12,7 @@
 .edit-product-box h1 {
   font-size: 1.8rem;
   font-weight: 500;
-  color: #111;
+  color: var(--text-h);
   margin-bottom: 2rem;
 }
 
@@ -32,25 +32,34 @@
 }
 
 .edit-product-actions button[type="submit"] {
-  background: #333;
-  color: white;
+  background: var(--text-h);
+  color: var(--bg);
+  border: 1px solid var(--border);
 }
 
 .edit-product-actions button[type="submit"]:hover {
-  background: #111;
+  background: var(--text);
+  color: var(--bg);
 }
 
 .edit-product-actions button[type="submit"]:disabled {
-  background: #999;
+  background: var(--border);
+  color: var(--text);
   cursor: not-allowed;
 }
 
 .btn-cancelar {
-  background: white;
-  color: #333;
-  border: 1px solid #ddd !important;
+  background: var(--bg);
+  color: var(--text-h);
+  border: 1px solid var(--border) !important;
 }
 
 .btn-cancelar:hover {
-  background: #f5f5f5 !important;
+  background: var(--code-bg) !important;
+}
+
+.edit-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }

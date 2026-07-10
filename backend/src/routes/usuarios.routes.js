@@ -8,13 +8,17 @@ const {
   obtenerUsuarios,
   obtenerUsuarioPorId,
   actualizarUsuario,
-  desactivarUsuario
+  desactivarUsuario,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/usuarios.controller');
 const { verificarToken, soloAdmin } = require('../middlewares/auth.middleware');
 
 // rutas públicas
 router.post('/registro', registrar);
 router.post('/login', login);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password/:token', resetPassword);
 
 // rutas autenticadas
 router.get('/me', verificarToken, obtenerMiPerfil);

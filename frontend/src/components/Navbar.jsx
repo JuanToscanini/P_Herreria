@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { useCart } from '../context/CartContext'
 import './Navbar.css'
 
-function Navbar({ titulo, links, cantidadCarrito }) {
+function Navbar({ titulo, links }) {
   const navigate = useNavigate()
   const [usuario, setUsuario] = useState(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const { cartQuantity } = useCart()
 
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem('usuario')
@@ -37,12 +39,19 @@ function Navbar({ titulo, links, cantidadCarrito }) {
         {usuario?.rol === 'admin' && (
           <li><Link to="/usuarios">Usuarios</Link></li>
         )}
+        {usuario && (
+          <li>
+            <Link to="/pedidos">
+              {usuario.rol === 'admin' ? 'Pedidos' : 'Mis pedidos'}
+            </Link>
+          </li>
+        )}
       </ul>
 
       <div className="navbar-actions">
-        <div className="navbar-cart">
-          🛒 {cantidadCarrito}
-        </div>
+        <Link to="/carrito" className="navbar-cart">
+          🛒 <span className="cart-badge">{cartQuantity}</span>
+        </Link>
         <div className="navbar-user">
           <button
             className="navbar-user-btn"

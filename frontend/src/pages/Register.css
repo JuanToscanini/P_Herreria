@@ -13,16 +13,16 @@
 .register-box h1 {
   font-size: 1.8rem;
   font-weight: 500;
-  color: #111;
+  color: var(--text-h);
   margin-bottom: 2rem;
   text-align: center;
 }
 
 .register-box button {
   width: 100%;
-  background: #333;
-  color: white;
-  border: none;
+  background: var(--text-h);
+  color: var(--bg);
+  border: 1px solid var(--border);
   padding: 0.75rem;
   border-radius: 4px;
   font-size: 0.95rem;
@@ -31,11 +31,13 @@
 }
 
 .register-box button:hover {
-  background: #111;
+  background: var(--text);
+  color: var(--bg);
 }
 
 .register-box button:disabled {
-  background: #999;
+  background: var(--border);
+  color: var(--text);
   cursor: not-allowed;
 }
 
@@ -43,10 +45,10 @@
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text);
 }
 
 .register-login a {
-  color: #333;
+  color: var(--accent);
   font-weight: 500;
 }

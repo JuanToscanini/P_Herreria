@@ -13,40 +13,42 @@
 }
 .detail-back {
   background: none;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--text-h);
   margin-bottom: 1.5rem;
 }
 
 .detail-back:hover {
-  background: #f5f5f5;
+  background: var(--code-bg);
 }
 
 .detail-description {
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 1rem 0;
+  color: var(--text);
 }
 
 .detail-price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #2c5282;
+  color: var(--accent);
 }
 
 .detail-stock, .detail-category {
   font-size: 1.1rem;
   margin: 0.5rem 0;
+  color: var(--text-h);
 }
 
 .detail-edit {
-  background: #333;
-  color: white;
-  border: none;
+  background: var(--text-h);
+  color: var(--bg);
+  border: 1px solid var(--border);
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -55,5 +57,6 @@
 }
 
 .detail-edit:hover {
-  background: #111;
+  background: var(--text);
+  color: var(--bg);
 }

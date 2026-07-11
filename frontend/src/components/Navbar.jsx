@@ -1,29 +1,46 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { FiShoppingCart } from 'react-icons/fi'
 import { useCart } from '../context/CartContext'
 import { getRol } from '../utils/auth'
 import './Navbar.css'
 
 function Navbar({ titulo, links }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [usuario, setUsuario] = useState(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [menuMobileAbierto, setMenuMobileAbierto] = useState(false)
   const { cartQuantity } = useCart()
 
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem('usuario')
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado))
+    setUsuario(usuarioGuardado ? JSON.parse(usuarioGuardado) : null)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!menuMobileAbierto) return
+
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        setMenuMobileAbierto(false)
+      }
     }
-  }, [])
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [menuMobileAbierto])
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('usuario')
     setUsuario(null)
     setMenuAbierto(false)
+    setMenuMobileAbierto(false)
     navigate('/')
   }
+
+  const cerrarMenuMobile = () => setMenuMobileAbierto(false)
 
   return (
     <nav className="navbar">
@@ -51,7 +68,9 @@ function Navbar({ titulo, links }) {
 
       <div className="navbar-actions">
         <Link to="/carrito" className="navbar-cart">
-          🛒 <span className="cart-badge">{cartQuantity}</span>
+          <FiShoppingCart className="navbar-cart-icon" />
+          <span className="navbar-cart-texto">Carrito</span>
+          <span className="cart-badge">{cartQuantity}</span>
         </Link>
         <div className="navbar-user">
           <button
@@ -74,6 +93,52 @@ function Navbar({ titulo, links }) {
             </div>
           )}
         </div>
+
+        <button
+          className="navbar-hamburger"
+          aria-label={menuMobileAbierto ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+          aria-expanded={menuMobileAbierto}
+          onClick={() => setMenuMobileAbierto(!menuMobileAbierto)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <div
+        className={`navbar-overlay ${menuMobileAbierto ? 'visible' : ''}`}
+        onClick={cerrarMenuMobile}
+      />
+
+      <div className={`navbar-mobile-menu ${menuMobileAbierto ? 'open' : ''}`}>
+        <ul>
+          {links.map((link, index) => (
+            <li key={index}>
+              <Link to={link.ruta} onClick={cerrarMenuMobile}>{link.nombre}</Link>
+            </li>
+          ))}
+          {getRol() === 'admin' && (
+            <li><Link to="/usuarios" onClick={cerrarMenuMobile}>Usuarios</Link></li>
+          )}
+          {usuario && (
+            <li>
+              <Link to="/pedidos" onClick={cerrarMenuMobile}>
+                {usuario.rol === 'admin' ? 'Pedidos' : 'Mis pedidos'}
+              </Link>
+            </li>
+          )}
+          <li className="navbar-mobile-divider"></li>
+          {usuario ? (
+            <>
+              <li className="dropdown-nombre">{usuario.nombre}</li>
+              <li><Link to="/perfil" onClick={cerrarMenuMobile}>Mi perfil</Link></li>
+              <li><button onClick={handleLogout}>Cerrar sesión</button></li>
+            </>
+          ) : (
+            <li><Link to="/login" onClick={cerrarMenuMobile}>Iniciar sesión</Link></li>
+          )}
+        </ul>
       </div>
     </nav>
   )

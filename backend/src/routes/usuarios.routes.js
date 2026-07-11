@@ -11,7 +11,7 @@ const {
   forgotPassword,
   resetPassword
 } = require('../controllers/usuarios.controller');
-const { verificarToken, soloAdmin, verificarTokenOpcional } = require('../middlewares/auth.middleware');
+const { verificarToken, soloAdmin, verificarTokenOpcional, esPropietarioOAdmin } = require('../middlewares/auth.middleware');
 
 // rutas públicas
 router.post('/registro', verificarTokenOpcional, registrar);
@@ -24,7 +24,7 @@ router.put('/me', verificarToken, actualizarMiPerfil);
 
 // rutas solo admin
 router.get('/', verificarToken, soloAdmin, obtenerUsuarios);
-router.get('/:id', verificarToken, soloAdmin, obtenerUsuarioPorId);
+router.get('/:id', verificarToken, esPropietarioOAdmin, obtenerUsuarioPorId);
 router.put('/:id', verificarToken, soloAdmin, actualizarUsuario);
 router.delete('/:id', verificarToken, soloAdmin, desactivarUsuario);
 

@@ -41,4 +41,13 @@ const verificarTokenOpcional = (req, res, next) => {
   next();
 };
 
-module.exports = { verificarToken, soloAdmin, verificarTokenOpcional };
+// Permite el paso si es admin, o si el :id de la ruta coincide con el usuario autenticado.
+// Requiere verificarToken antes (usa req.usuario) y una ruta con parámetro :id.
+const esPropietarioOAdmin = (req, res, next) => {
+  if (req.usuario.rol === 'admin' || req.usuario.id === req.params.id) {
+    return next();
+  }
+  res.status(403).json({ error: 'Acceso denegado, no sos el dueño del recurso ni admin' });
+};
+
+module.exports = { verificarToken, soloAdmin, verificarTokenOpcional, esPropietarioOAdmin };

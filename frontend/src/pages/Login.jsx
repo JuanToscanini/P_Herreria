@@ -31,8 +31,6 @@ function Login() {
       localStorage.setItem('usuario', JSON.stringify(response.data.usuario))
       toast.success(`Bienvenido, ${response.data.usuario.nombre}`)
       navigate(redirect)
-      // Recargar la página para que el Navbar actualice el estado del usuario
-      window.location.reload()
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al iniciar sesión')
     } finally {

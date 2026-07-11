@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axiosConfig'
-import { getRol } from '../utils/auth'
+import { getRol, getUserFromToken } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './Users.css'
 
@@ -27,7 +27,7 @@ function Users() {
       navigate('/productos')
       return
     }
-    setUsuarioActual(usuario)
+    setUsuarioActual(getUserFromToken())
     fetchUsuarios()
   }, [])
 

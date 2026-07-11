@@ -4,9 +4,11 @@ const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../config/mailer');
 
 // POST /api/usuarios/registro
+const ROLES_VALIDOS = ['cliente', 'admin'];
+
 const registrar = async (req, res) => {
   try {
-    const { nombre, email, contrasena, telefono } = req.body;
+    const { nombre, email, contrasena, telefono, rol } = req.body;
 
     if (!nombre || !email || !contrasena) {
       return res.status(400).json({ error: 'Nombre, email y contraseña son obligatorios' });
@@ -17,8 +19,14 @@ const registrar = async (req, res) => {
       return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
     }
 
+    // Solo un admin autenticado puede elegir el rol del nuevo usuario;
+    // cualquier otro caso (registro público) queda forzado a 'cliente'.
+    const rolFinal = req.usuario?.rol === 'admin' && ROLES_VALIDOS.includes(rol)
+      ? rol
+      : 'cliente';
+
     const hash = await bcrypt.hash(contrasena, 10);
-    const nuevoUsuario = new Usuario({ nombre, email, contrasena: hash, telefono });
+    const nuevoUsuario = new Usuario({ nombre, email, contrasena: hash, telefono, rol: rolFinal });
     await nuevoUsuario.save();
 
     res.status(201).json({ mensaje: 'Usuario creado correctamente' });

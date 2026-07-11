@@ -24,4 +24,21 @@ const soloAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { verificarToken, soloAdmin };
+// No rechaza si falta el token o es inválido: solo adjunta req.usuario cuando puede verificarlo.
+// Sirve para rutas públicas donde un admin autenticado debe poder hacer algo extra (ej: fijar el rol al crear un usuario).
+const verificarTokenOpcional = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    try {
+      req.usuario = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      // token inválido o expirado: se ignora, la request sigue como anónima
+    }
+  }
+
+  next();
+};
+
+module.exports = { verificarToken, soloAdmin, verificarTokenOpcional };

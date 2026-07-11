@@ -11,10 +11,10 @@ const {
   forgotPassword,
   resetPassword
 } = require('../controllers/usuarios.controller');
-const { verificarToken, soloAdmin } = require('../middlewares/auth.middleware');
+const { verificarToken, soloAdmin, verificarTokenOpcional } = require('../middlewares/auth.middleware');
 
 // rutas públicas
-router.post('/registro', registrar);
+router.post('/registro', verificarTokenOpcional, registrar);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import api from '../api/axiosConfig'
+import { getRol } from '../utils/auth'
 import './ProductList.css'
 import Spinner from '../components/Spinner'
 
@@ -12,8 +13,7 @@ function ProductList() {
   const [inactivos, setInactivos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const usuario = JSON.parse(localStorage.getItem('usuario'))
-  const esAdmin = usuario?.rol === 'admin'
+  const esAdmin = getRol() === 'admin'
 
   useEffect(() => {
     fetchProductos()

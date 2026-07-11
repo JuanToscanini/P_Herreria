@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
+import { getRol } from '../utils/auth'
 import './NewProduct.css'
 
 function NewProduct() {
@@ -17,8 +18,7 @@ function NewProduct() {
   })
 
   useEffect(() => {
-    const usuario = JSON.parse(localStorage.getItem('usuario'))
-    if (!usuario || usuario.rol !== 'admin') {
+    if (getRol() !== 'admin') {
       navigate('/productos')
     }
   }, [])

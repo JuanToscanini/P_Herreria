@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const {
   registrar,
-  login,
   obtenerMiPerfil,
   actualizarMiPerfil,
   obtenerUsuarios,
@@ -16,7 +15,6 @@ const { verificarToken, soloAdmin } = require('../middlewares/auth.middleware');
 
 // rutas públicas
 router.post('/registro', registrar);
-router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axiosConfig'
+import { getRol } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './Users.css'
 
@@ -22,8 +23,7 @@ function Users() {
   const [usuarioActual, setUsuarioActual] = useState(null)
 
   useEffect(() => {
-    const usuario = JSON.parse(localStorage.getItem('usuario'))
-    if (!usuario || usuario.rol !== 'admin') {
+    if (getRol() !== 'admin') {
       navigate('/productos')
       return
     }

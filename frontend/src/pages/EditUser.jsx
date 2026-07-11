@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
+import { getRol } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './EditUser.css'
 
@@ -19,8 +20,7 @@ function EditUser() {
   })
 
   useEffect(() => {
-    const usuario = JSON.parse(localStorage.getItem('usuario'))
-    if (!usuario || usuario.rol !== 'admin') {
+    if (getRol() !== 'admin') {
       navigate('/usuarios')
       return
     }

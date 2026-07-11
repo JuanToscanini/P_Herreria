@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/axiosConfig'
+import { getRol } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './ProductDetail.css'
 
@@ -25,8 +26,6 @@ function ProductDetail() {
     fetchProducto()
   }, [id])
 
-  const usuario = JSON.parse(localStorage.getItem('usuario'))
-
   if (loading) return <Spinner mensaje="Cargando producto..." />
   if (error) return <Spinner mensaje="Error al cargar el producto" />
   if (!producto) return <p>Producto no encontrado</p>
@@ -36,7 +35,7 @@ function ProductDetail() {
       <button className="detail-back" onClick={() => navigate(-1)}>
         ← Volver
       </button>
-      {usuario?.rol === 'admin' && (
+      {getRol() === 'admin' && (
         <button
           className="detail-edit"
           onClick={() => navigate(`/productos/editar/${id}`)}

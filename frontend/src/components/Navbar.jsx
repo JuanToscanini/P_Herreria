@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
+import { getRol } from '../utils/auth'
 import './Navbar.css'
 
 function Navbar({ titulo, links }) {
@@ -36,7 +37,7 @@ function Navbar({ titulo, links }) {
             <Link to={link.ruta}>{link.nombre}</Link>
           </li>
         ))}
-        {usuario?.rol === 'admin' && (
+        {getRol() === 'admin' && (
           <li><Link to="/usuarios">Usuarios</Link></li>
         )}
         {usuario && (

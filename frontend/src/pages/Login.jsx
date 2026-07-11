@@ -26,7 +26,7 @@ function Login() {
 
     setLoading(true)
     try {
-      const response = await api.post('/usuarios/login', form)
+      const response = await api.post('/auth/login', form)
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('usuario', JSON.stringify(response.data.usuario))
       toast.success(`Bienvenido, ${response.data.usuario.nombre}`)

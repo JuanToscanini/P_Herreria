@@ -34,7 +34,7 @@ function ResetPassword() {
 
     setLoading(true);
     try {
-      const response = await api.post(`/usuarios/reset-password/${token}`, { contrasena });
+      const response = await api.post(`/auth/reset-password/${token}`, { contrasena });
       toast.success(response.data.mensaje || 'Contraseña restablecida correctamente');
       navigate(`/login${redirect !== '/productos' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`);
     } catch (err) {

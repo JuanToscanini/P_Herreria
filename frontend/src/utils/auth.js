@@ -15,15 +15,16 @@ export function getUserFromToken() {
   }
 }
 
-export function getRol() {
-  const payload = getUserFromToken()
-  return payload?.rol ?? null
-}
-
 export function isAuthenticated() {
   const payload = getUserFromToken()
   if (!payload?.exp) return false
   return Date.now() < payload.exp * 1000
+}
+
+export function getRol() {
+  if (!isAuthenticated()) return null
+  const payload = getUserFromToken()
+  return payload?.rol ?? null
 }
 
 export function logout() {

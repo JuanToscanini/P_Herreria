@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axiosConfig'
-import { getRol, getUserFromToken } from '../utils/auth'
+import { getRol, getUserFromToken, getToken } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './Users.css'
 
@@ -33,7 +33,7 @@ function Users() {
 
   const fetchUsuarios = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       const response = await api.get('/usuarios', {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -48,7 +48,7 @@ function Users() {
 
   const reactivarUsuario = async (id) => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.put(`/usuarios/${id}`, { activo: true }, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -60,7 +60,7 @@ function Users() {
 
   const handleCambiarRol = async (id, nuevoRol) => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.put(`/usuarios/${id}`, { rol: nuevoRol }, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -72,7 +72,7 @@ function Users() {
 
   const handleToggleEstado = async (id, activoActual) => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.put(`/usuarios/${id}`, { activo: !activoActual }, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -97,7 +97,7 @@ function Users() {
 
     setLoadingForm(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.post('/usuarios/registro', form, {
         headers: { Authorization: `Bearer ${token}` }
       })

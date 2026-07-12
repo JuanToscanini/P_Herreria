@@ -64,7 +64,8 @@ const crearOrden = async (req, res) => {
       envio,
       datosEnvio: envio ? datosEnvio : { nombreCompleto: '', dni: '', direccion: '', telefono: '' },
       medioPago,
-      estado: 'pendiente de pago'
+      estadoPago: 'pendiente de pago',
+      estadoEnvio: 'pendiente'
     });
 
     await nuevaOrden.save();
@@ -110,25 +111,38 @@ const obtenerOrdenes = async (req, res) => {
 };
 
 // PATCH /api/ordenes/:id
+const ESTADOS_PAGO_PERMITIDOS = ['pendiente de pago', 'pago confirmado', 'cancelado'];
+const ESTADOS_ENVIO_PERMITIDOS = ['pendiente', 'enviado', 'entregado'];
+const ESTADOS_RETIRO_PERMITIDOS = ['pendiente', 'listo para retiro', 'entregado'];
+
 const actualizarEstado = async (req, res) => {
   try {
-    const { estado } = req.body;
-    const orden = await Orden.findById(req.params.id);
+    const { estadoPago, estadoEnvio } = req.body;
 
+    if (estadoPago === undefined && estadoEnvio === undefined) {
+      return res.status(400).json({ error: 'Debe enviar estadoPago y/o estadoEnvio' });
+    }
+
+    const orden = await Orden.findById(req.params.id);
     if (!orden) {
       return res.status(404).json({ error: 'Orden no encontrada' });
     }
 
-    // Validar estados permitidos
-    const estadosEnvioPermitidos = ['pendiente de pago', 'pago confirmado', 'enviado', 'entregado', 'cancelado'];
-    const estadosRetiroPermitidos = ['pendiente de pago', 'pago confirmado', 'listo para retiro', 'entregado', 'cancelado'];
-    const estadosValidos = orden.envio ? estadosEnvioPermitidos : estadosRetiroPermitidos;
-
-    if (!estadosValidos.includes(estado)) {
-      return res.status(400).json({ error: `El estado "${estado}" no es válido para este tipo de entrega.` });
+    if (estadoPago !== undefined) {
+      if (!ESTADOS_PAGO_PERMITIDOS.includes(estadoPago)) {
+        return res.status(400).json({ error: `El estado de pago "${estadoPago}" no es válido.` });
+      }
+      orden.estadoPago = estadoPago;
     }
 
-    orden.estado = estado;
+    if (estadoEnvio !== undefined) {
+      const estadosValidos = orden.envio ? ESTADOS_ENVIO_PERMITIDOS : ESTADOS_RETIRO_PERMITIDOS;
+      if (!estadosValidos.includes(estadoEnvio)) {
+        return res.status(400).json({ error: `El estado de envío "${estadoEnvio}" no es válido para este tipo de entrega.` });
+      }
+      orden.estadoEnvio = estadoEnvio;
+    }
+
     await orden.save();
 
     res.json(orden);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axiosConfig'
+import { getToken, isAuthenticated } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './Profile.css'
 
@@ -20,8 +21,7 @@ function Profile() {
   })
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
+    if (!isAuthenticated()) {
       navigate('/login')
       return
     }
@@ -30,7 +30,7 @@ function Profile() {
 
   const fetchPerfil = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       const response = await api.get('/usuarios/me', {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -64,7 +64,7 @@ function Profile() {
 
     setLoadingForm(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       const datos = {
         nombre: form.nombre,
         email: form.email,

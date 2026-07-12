@@ -69,6 +69,13 @@
   color: var(--text-h);
 }
 
+.order-status-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
 .order-status-badge {
   font-size: 0.75rem;
   font-weight: bold;
@@ -79,7 +86,8 @@
 }
 
 /* Colores de badges */
-.order-status-badge.pendiente-de-pago {
+.order-status-badge.pendiente-de-pago,
+.order-status-badge.pendiente {
   background-color: rgba(241, 196, 15, 0.15);
   color: #f1c40f;
   border: 1px solid rgba(241, 196, 15, 0.25);

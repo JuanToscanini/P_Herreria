@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import api from '../api/axiosConfig'
-import { getRol } from '../utils/auth'
+import { getRol, getToken } from '../utils/auth'
 import './ProductList.css'
 import Spinner from '../components/Spinner'
 
@@ -21,7 +21,7 @@ function ProductList() {
 
   const fetchProductos = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       const config = esAdmin ? { headers: { Authorization: `Bearer ${token}` } } : {}
       const response = await api.get('/productos', config)
       setProductos(response.data.filter(p => p.activo))
@@ -35,7 +35,7 @@ function ProductList() {
 
   const reactivarProducto = async (id) => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.put(`/productos/${id}`, { activo: true }, {
         headers: { Authorization: `Bearer ${token}` }
       })

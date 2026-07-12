@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
-import { getRol } from '../utils/auth'
+import { getRol, getToken } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './EditUser.css'
 
@@ -29,7 +29,7 @@ function EditUser() {
 
   const fetchUsuario = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       const response = await api.get(`/usuarios/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -63,7 +63,7 @@ function EditUser() {
 
     setLoadingForm(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.put(`/usuarios/${id}`, body, {
         headers: { Authorization: `Bearer ${token}` }
       })

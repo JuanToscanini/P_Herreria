@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
-import { getRol } from '../utils/auth'
+import { getRol, getToken } from '../utils/auth'
 import Spinner from '../components/Spinner'
 import './EditProduct.css'
 
@@ -54,7 +54,7 @@ function EditProduct() {
 
     setLoadingForm(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.put(`/productos/${id}`, form, {
         headers: { Authorization: `Bearer ${token}` }
       })

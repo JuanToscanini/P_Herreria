@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useCart } from '../context/CartContext';
+import { getToken } from '../utils/auth';
 import api from '../api/axiosConfig';
 import './Cart.css';
 
@@ -83,8 +84,8 @@ function Cart() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = getToken();
+
       const payload = {
         items: cartItems.map(item => ({
           producto: item.producto._id,

@@ -158,41 +158,52 @@ async function sendOrderConfirmationEmail(email, orden) {
   return transporter.sendMail(mailOptions);
 }
 
+// Mensajes descriptivos para cada estado de pago y de envío
+function mensajePago(estadoPago) {
+  switch ((estadoPago || '').toLowerCase()) {
+    case 'pago confirmado':
+      return 'Hemos registrado correctamente tu pago.';
+    case 'cancelado':
+      return 'Tu pedido ha sido cancelado. Si tenés alguna duda, por favor ponete en contacto con nosotros.';
+    case 'pendiente de pago':
+    default:
+      return 'Todavía estamos esperando la confirmación de tu pago.';
+  }
+}
+
+function mensajeEnvio(estadoEnvio, envio) {
+  switch ((estadoEnvio || '').toLowerCase()) {
+    case 'enviado':
+      return 'Tu pedido ya fue despachado y está en camino a tu domicilio.';
+    case 'listo para retiro':
+      return 'Tu pedido ya está preparado. Podés pasar a retirarlo por nuestro local.';
+    case 'entregado':
+      return envio
+        ? 'Tu pedido fue entregado en tu domicilio. ¡Muchas gracias por elegirnos!'
+        : 'Tu pedido fue retirado del local. ¡Muchas gracias por elegirnos!';
+    case 'pendiente':
+    default:
+      return envio
+        ? 'Tu pedido todavía no fue despachado.'
+        : 'Tu pedido todavía no está listo para retirar.';
+  }
+}
+
 // 3. Envío de correo de cambio de estado de pedido
 async function sendOrderStatusUpdateEmail(email, orden) {
   const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/pedidos`;
-  
+
   console.log('\n==================================================');
   console.log('📧 [CORREO] ACTUALIZACIÓN DE ESTADO ENVIADA');
   console.log(`Para: ${email}`);
   console.log(`Orden ID: ${orden._id}`);
-  console.log(`Nuevo estado: ${orden.estado}`);
+  console.log(`Estado de pago: ${orden.estadoPago}`);
+  console.log(`Estado de envío: ${orden.estadoEnvio}`);
   console.log('==================================================\n');
 
   if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASS) {
     console.log('⚠️ NOTA: SMTP_EMAIL o SMTP_PASS no configurados. Se simula envío exitoso.');
     return { message: 'Mock email sent' };
-  }
-
-  let estadoMensaje = '';
-  switch(orden.estado.toLowerCase()) {
-    case 'pago confirmado':
-      estadoMensaje = 'Hemos registrado correctamente tu pago. Tu pedido comenzará a procesarse.';
-      break;
-    case 'enviado':
-      estadoMensaje = 'Tu pedido ya fue despachado y está en camino a tu domicilio.';
-      break;
-    case 'listo para retiro':
-      estadoMensaje = 'Tu pedido ya está preparado. Podés pasar a retirarlo por nuestro local.';
-      break;
-    case 'entregado':
-      estadoMensaje = 'Tu pedido figura como entregado. ¡Muchas gracias por elegirnos!';
-      break;
-    case 'cancelado':
-      estadoMensaje = 'Tu pedido ha sido cancelado. Si tenés alguna duda, por favor ponete en contacto con nosotros.';
-      break;
-    default:
-      estadoMensaje = `El estado de tu pedido cambió a: <strong>${orden.estado}</strong>.`;
   }
 
   const mailOptions = {
@@ -204,17 +215,20 @@ async function sendOrderStatusUpdateEmail(email, orden) {
         <h2 style="color: #333; text-align: center;">Actualización de Pedido</h2>
         <p style="text-align: center; color: #666;">Pedido #${orden._id}</p>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-        
+
         <p>Hola,</p>
         <p>Te informamos que hubo una actualización en tu pedido:</p>
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 4px; text-align: center; margin: 20px 0; border: 1px dashed #ccc;">
-          <p style="margin: 0 0 10px 0; font-size: 1.2rem; font-weight: bold; color: #333;">${orden.estado.toUpperCase()}</p>
-          <p style="margin: 0; color: #555;">${estadoMensaje}</p>
+
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 4px; margin: 20px 0; border: 1px dashed #ccc;">
+          <p style="margin: 0 0 5px 0; font-size: 1rem; font-weight: bold; color: #333;">PAGO: ${orden.estadoPago.toUpperCase()}</p>
+          <p style="margin: 0 0 15px 0; color: #555;">${mensajePago(orden.estadoPago)}</p>
+          <p style="margin: 0 0 5px 0; font-size: 1rem; font-weight: bold; color: #333;">ENVÍO: ${orden.estadoEnvio.toUpperCase()}</p>
+          <p style="margin: 0; color: #555;">${mensajeEnvio(orden.estadoEnvio, orden.envio)}</p>
         </div>
- 
+
         <p><strong>Tipo de entrega:</strong> ${orden.envio ? 'Envío a domicilio' : 'Retiro en el local'}</p>
         <p><strong>Total:</strong> ${formatCurrency(orden.total)}</p>
- 
+
         <div style="text-align: center; margin: 30px 0;">
           <a href="${resetLink}" style="background-color: #333; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Ver mis pedidos</a>
         </div>

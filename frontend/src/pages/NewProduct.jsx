@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../api/axiosConfig'
-import { getRol } from '../utils/auth'
+import { getRol, getToken } from '../utils/auth'
 import './NewProduct.css'
 
 function NewProduct() {
@@ -41,7 +41,7 @@ function NewProduct() {
 
     setLoadingForm(true)
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
       await api.post('/productos', {
         nombre: form.nombre,
         descripcion: form.descripcion,

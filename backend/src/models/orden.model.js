@@ -23,9 +23,15 @@ const ordenSchema = new mongoose.Schema({
     telefono: { type: String, default: '' }
   },
   medioPago: { type: String, enum: ['transferencia', 'efectivo'], required: true },
-  estado: { 
-    type: String, 
-    default: 'pendiente de pago' 
+  estadoPago: {
+    type: String,
+    enum: ['pendiente de pago', 'pago confirmado', 'cancelado'],
+    default: 'pendiente de pago'
+  },
+  estadoEnvio: {
+    type: String,
+    enum: ['pendiente', 'enviado', 'listo para retiro', 'entregado'],
+    default: 'pendiente'
   }
 }, { timestamps: true });
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../api/axiosConfig';
+import { getToken } from '../utils/auth';
 import Spinner from '../components/Spinner';
 import './Orders.css';
 
@@ -26,7 +27,7 @@ function Orders() {
 
   const fetchOrdenes = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const response = await api.get('/ordenes', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -38,10 +39,10 @@ function Orders() {
     }
   };
 
-  const handleEstadoChange = async (ordenId, nuevoEstado) => {
+  const handleEstadoChange = async (ordenId, campo, nuevoValor) => {
     try {
-      const token = localStorage.getItem('token');
-      await api.patch(`/ordenes/${ordenId}`, { estado: nuevoEstado }, {
+      const token = getToken();
+      await api.patch(`/ordenes/${ordenId}`, { [campo]: nuevoValor }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Estado actualizado correctamente');
@@ -54,7 +55,7 @@ function Orders() {
   const handleNotificarCliente = async (ordenId) => {
     setNotifyingIds(prev => ({ ...prev, [ordenId]: true }));
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       await api.post(`/ordenes/${ordenId}/notificar`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -111,9 +112,10 @@ function Orders() {
       <div className="orders-list">
         {ordenes.map(orden => {
           // Listas de estados dinámicos
-          const estadosEnvio = ['pendiente de pago', 'pago confirmado', 'enviado', 'entregado', 'cancelado'];
-          const estadosRetiro = ['pendiente de pago', 'pago confirmado', 'listo para retiro', 'entregado', 'cancelado'];
-          const estadosDisponibles = orden.envio ? estadosEnvio : estadosRetiro;
+          const estadosPagoDisponibles = ['pendiente de pago', 'pago confirmado', 'cancelado'];
+          const estadosEnvioDisponibles = orden.envio
+            ? ['pendiente', 'enviado', 'entregado']
+            : ['pendiente', 'listo para retiro', 'entregado'];
 
           return (
             <div key={orden._id} className="order-card">
@@ -126,19 +128,35 @@ function Orders() {
                 <div className="order-total-status">
                   <div className="order-total">{formatPesos(orden.total)}</div>
                   {!esAdmin ? (
-                    <span className={`order-status-badge ${orden.estado.replace(/\s+/g, '-')}`}>
-                      {orden.estado.toUpperCase()}
-                    </span>
+                    <div className="order-status-badges">
+                      <span className={`order-status-badge ${orden.estadoPago.replace(/\s+/g, '-')}`}>
+                        PAGO: {orden.estadoPago.toUpperCase()}
+                      </span>
+                      <span className={`order-status-badge ${orden.estadoEnvio.replace(/\s+/g, '-')}`}>
+                        ENVÍO: {orden.estadoEnvio.toUpperCase()}
+                      </span>
+                    </div>
                   ) : (
                     <div className="admin-status-control">
                       <select
-                        value={orden.estado}
-                        onChange={(e) => handleEstadoChange(orden._id, e.target.value)}
+                        value={orden.estadoPago}
+                        onChange={(e) => handleEstadoChange(orden._id, 'estadoPago', e.target.value)}
                         className="status-select"
                       >
-                        {estadosDisponibles.map(est => (
+                        {estadosPagoDisponibles.map(est => (
                           <option key={est} value={est}>
-                            {est.toUpperCase()}
+                            PAGO: {est.toUpperCase()}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={orden.estadoEnvio}
+                        onChange={(e) => handleEstadoChange(orden._id, 'estadoEnvio', e.target.value)}
+                        className="status-select"
+                      >
+                        {estadosEnvioDisponibles.map(est => (
+                          <option key={est} value={est}>
+                            ENVÍO: {est.toUpperCase()}
                           </option>
                         ))}
                       </select>

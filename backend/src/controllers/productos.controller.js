@@ -3,7 +3,8 @@ const Producto = require('../models/producto.model');
 // GET /api/productos
 const obtenerProductos = async (req, res) => {
   try {
-    const productos = await Producto.find({ activo: true });
+    const filtro = req.usuario?.rol === 'admin' ? {} : { activo: true };
+    const productos = await Producto.find(filtro);
     res.json(productos);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener productos' });

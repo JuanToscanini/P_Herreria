@@ -56,7 +56,7 @@ function Orders() {
     setNotifyingIds(prev => ({ ...prev, [ordenId]: true }));
     try {
       const token = getToken();
-      await api.post(`/ordenes/${ordenId}/notificar`, {}, {
+      await api.post(`/ordenes/${ordenId}/notificaciones`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Email de notificación enviado correctamente');

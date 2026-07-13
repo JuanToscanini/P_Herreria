@@ -1,7 +1,19 @@
+const mongoose = require('mongoose');
 const Orden = require('../models/orden.model');
 const Producto = require('../models/producto.model');
 const Usuario = require('../models/usuario.model');
 const { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } = require('../config/mailer');
+
+// Error controlado: permite abortar la transacción y devolver un status/mensaje
+// específico (stock insuficiente, producto no encontrado, etc.) sin caer en el 500 genérico.
+class ErrorOrden extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
+const MAX_INTENTOS_TRANSACCION = 3;
 
 // POST /api/ordenes
 const crearOrden = async (req, res) => {
@@ -24,53 +36,97 @@ const crearOrden = async (req, res) => {
       return res.status(400).json({ error: 'Debe seleccionar un medio de pago' });
     }
 
-    let total = 0;
-    const itemsConPrecio = [];
+    let nuevaOrden;
+    let intentos = 0;
 
-    // Validar stock y guardar precio histórico de los productos
-    for (const item of items) {
-      const producto = await Producto.findById(item.producto);
-      if (!producto) {
-        return res.status(404).json({ error: `Producto con ID ${item.producto} no encontrado` });
+    // Verificación + descuento de stock y creación de la orden corren dentro de una
+    // transacción de Mongo. Si dos compras concurrentes tocan el mismo producto, Mongo
+    // puede abortar una de las dos con un "WriteConflict" (TransientTransactionError):
+    // el patrón recomendado ante eso es reintentar la transacción completa, no tratarlo
+    // como error fatal.
+    while (true) {
+      const session = await mongoose.startSession();
+      try {
+        session.startTransaction();
+
+        let total = 0;
+        const itemsConPrecio = [];
+
+        for (const item of items) {
+          // Verificación y descuento en UNA sola operación atómica: el filtro exige
+          // que el stock actual en Mongo (no el que vino en el body) siga alcanzando
+          // para la cantidad pedida, y el producto siga activo. Si otra request ya
+          // descontó el stock primero, este findOneAndUpdate no encuentra coincidencia
+          // y devuelve null — evitamos así el find() + validar en JS + save() por
+          // separado, que deja una ventana entre leer y escribir donde dos compras
+          // podrían creer que ambas tienen stock disponible y sobrevender.
+          const productoActualizado = await Producto.findOneAndUpdate(
+            { _id: item.producto, activo: true, stock: { $gte: item.cantidad } },
+            { $inc: { stock: -item.cantidad } },
+            { returnDocument: 'after', session }
+          );
+
+          if (productoActualizado) {
+            itemsConPrecio.push({
+              producto: productoActualizado._id,
+              cantidad: item.cantidad,
+              precioEnElMomento: productoActualizado.precio
+            });
+            total += productoActualizado.precio * item.cantidad;
+            continue;
+          }
+
+          // No hubo match: puede ser que no exista, esté inactivo, o no tenga stock.
+          // Solo en el camino de error hacemos una lectura extra para dar un mensaje preciso.
+          const producto = await Producto.findById(item.producto).session(session);
+          if (!producto) {
+            throw new ErrorOrden(404, `Producto con ID ${item.producto} no encontrado`);
+          }
+          if (!producto.activo) {
+            throw new ErrorOrden(400, `El producto ${producto.nombre} no está disponible para la venta`);
+          }
+          throw new ErrorOrden(
+            400,
+            `Ya no hay stock suficiente de "${producto.nombre}". Disponible: ${producto.stock}`
+          );
+        }
+
+        const [ordenCreada] = await Orden.create([{
+          usuario: req.usuario.id,
+          items: itemsConPrecio,
+          total,
+          facturacion,
+          envio,
+          datosEnvio: envio ? datosEnvio : { nombreCompleto: '', dni: '', direccion: '', telefono: '' },
+          medioPago,
+          estadoPago: 'pendiente de pago',
+          estadoEnvio: 'pendiente'
+        }], { session });
+
+        await session.commitTransaction();
+        nuevaOrden = ordenCreada;
+        break; // éxito, salimos del loop de reintentos
+      } catch (error) {
+        await session.abortTransaction().catch(() => {});
+
+        if (error instanceof ErrorOrden) {
+          return res.status(error.status).json({ error: error.message });
+        }
+
+        const esTransitorio = error.hasErrorLabel && error.hasErrorLabel('TransientTransactionError');
+        intentos++;
+        if (esTransitorio && intentos < MAX_INTENTOS_TRANSACCION) {
+          continue;
+        }
+
+        throw error;
+      } finally {
+        session.endSession();
       }
-
-      if (!producto.activo) {
-        return res.status(400).json({ error: `El producto ${producto.nombre} no está disponible para la venta` });
-      }
-
-      if (producto.stock < item.cantidad) {
-        return res.status(400).json({ error: `Stock insuficiente para el producto ${producto.nombre}. Disponible: ${producto.stock}` });
-      }
-
-      itemsConPrecio.push({
-        producto: producto._id,
-        cantidad: item.cantidad,
-        precioEnElMomento: producto.precio
-      });
-
-      total += producto.precio * item.cantidad;
-
-      // Descontar stock
-      producto.stock -= item.cantidad;
-      await producto.save();
     }
 
-    // Crear la orden
-    const nuevaOrden = new Orden({
-      usuario: req.usuario.id,
-      items: itemsConPrecio,
-      total,
-      facturacion,
-      envio,
-      datosEnvio: envio ? datosEnvio : { nombreCompleto: '', dni: '', direccion: '', telefono: '' },
-      medioPago,
-      estadoPago: 'pendiente de pago',
-      estadoEnvio: 'pendiente'
-    });
-
-    await nuevaOrden.save();
-
-    // Consultar la orden y poblar para mandar el correo
+    // La orden ya está confirmada y el stock ya descontado; el mail de confirmación
+    // no necesita formar parte de la transacción.
     const ordenPoblada = await Orden.findById(nuevaOrden._id)
       .populate('items.producto', 'nombre');
 
@@ -151,7 +207,7 @@ const actualizarEstado = async (req, res) => {
   }
 };
 
-// POST /api/ordenes/:id/notificar
+// POST /api/ordenes/:id/notificaciones
 const notificarCambioEstado = async (req, res) => {
   try {
     const orden = await Orden.findById(req.params.id).populate('usuario', 'email');

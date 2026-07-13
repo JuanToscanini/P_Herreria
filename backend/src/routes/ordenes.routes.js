@@ -14,6 +14,6 @@ router.get('/', verificarToken, obtenerOrdenes);
 
 // Rutas exclusivas de administrador
 router.patch('/:id', verificarToken, soloAdmin, actualizarEstado);
-router.post('/:id/notificar', verificarToken, soloAdmin, notificarCambioEstado);
+router.post('/:id/notificaciones', verificarToken, soloAdmin, notificarCambioEstado);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const Producto = require('../models/producto.model');
+const { manejarErrorMongo } = require('../utils/manejarErrorMongo');
 
 // GET /api/productos
 const obtenerProductos = async (req, res) => {
@@ -20,7 +21,7 @@ const obtenerProductoPorId = async (req, res) => {
     }
     res.json(producto);
   } catch (error) {
-    res.status(500).json({ error: 'Error al buscar el producto' });
+    manejarErrorMongo(error, res, 'Error al buscar el producto');
   }
 };
 
@@ -38,7 +39,7 @@ const crearProducto = async (req, res) => {
 
     res.status(201).json(nuevoProducto);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear el producto' });
+    manejarErrorMongo(error, res, 'Error al crear el producto');
   }
 };
 
@@ -55,7 +56,7 @@ const actualizarProducto = async (req, res) => {
     }
     res.json(producto);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el producto' });
+    manejarErrorMongo(error, res, 'Error al actualizar el producto');
   }
 };
 
@@ -72,7 +73,7 @@ const eliminarProducto = async (req, res) => {
     }
     res.json({ mensaje: 'Producto eliminado correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el producto' });
+    manejarErrorMongo(error, res, 'Error al eliminar el producto');
   }
 };
 

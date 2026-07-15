@@ -1,5 +1,6 @@
 const Usuario = require('../models/usuario.model');
 const bcrypt = require('bcrypt');
+const { manejarErrorMongo } = require('../utils/manejarErrorMongo');
 
 // POST /api/usuarios/registro
 const ROLES_VALIDOS = ['cliente', 'admin'];
@@ -29,7 +30,7 @@ const registrar = async (req, res) => {
 
     res.status(201).json({ mensaje: 'Usuario creado correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al registrar el usuario' });
+    manejarErrorMongo(error, res, 'Error al registrar el usuario');
   }
 };
 
@@ -37,9 +38,12 @@ const registrar = async (req, res) => {
 const obtenerMiPerfil = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.usuario.id).select('-contrasena');
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
     res.json(usuario);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el perfil' });
+    manejarErrorMongo(error, res, 'Error al obtener el perfil');
   }
 };
 
@@ -86,7 +90,7 @@ const actualizarMiPerfil = async (req, res) => {
       usuario: usuarioRespuesta
     });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el perfil' });
+    manejarErrorMongo(error, res, 'Error al actualizar el perfil');
   }
 };
 
@@ -96,7 +100,7 @@ const obtenerUsuarios = async (req, res) => {
     const usuarios = await Usuario.find().select('-contrasena');
     res.json(usuarios);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los usuarios' });
+    manejarErrorMongo(error, res, 'Error al obtener los usuarios');
   }
 };
 
@@ -109,7 +113,7 @@ const obtenerUsuarioPorId = async (req, res) => {
     }
     res.json(usuario);
   } catch (error) {
-    res.status(500).json({ error: 'Error al buscar el usuario' });
+    manejarErrorMongo(error, res, 'Error al buscar el usuario');
   }
 };
 
@@ -133,7 +137,12 @@ const actualizarUsuario = async (req, res) => {
       }
     }
     if (telefono !== undefined) usuario.telefono = telefono;
-    if (rol) usuario.rol = rol;
+    if (rol) {
+      if (!ROLES_VALIDOS.includes(rol)) {
+        return res.status(400).json({ error: `Rol "${rol}" no es válido` });
+      }
+      usuario.rol = rol;
+    }
     if (activo !== undefined) usuario.activo = activo;
 
     await usuario.save();
@@ -143,7 +152,7 @@ const actualizarUsuario = async (req, res) => {
 
     res.json(usuarioRespuesta);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el usuario' });
+    manejarErrorMongo(error, res, 'Error al actualizar el usuario');
   }
 };
 
@@ -160,7 +169,7 @@ const desactivarUsuario = async (req, res) => {
     }
     res.json({ mensaje: 'Usuario desactivado correctamente', usuario });
   } catch (error) {
-    res.status(500).json({ error: 'Error al desactivar el usuario' });
+    manejarErrorMongo(error, res, 'Error al desactivar el usuario');
   }
 };
 

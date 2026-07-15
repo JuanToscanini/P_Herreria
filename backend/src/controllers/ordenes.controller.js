@@ -3,6 +3,7 @@ const Orden = require('../models/orden.model');
 const Producto = require('../models/producto.model');
 const Usuario = require('../models/usuario.model');
 const { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } = require('../config/mailer');
+const { manejarErrorMongo } = require('../utils/manejarErrorMongo');
 
 // Error controlado: permite abortar la transacción y devolver un status/mensaje
 // específico (stock insuficiente, producto no encontrado, etc.) sin caer en el 500 genérico.
@@ -113,6 +114,10 @@ const crearOrden = async (req, res) => {
           return res.status(error.status).json({ error: error.message });
         }
 
+        if (error.name === 'CastError' || error.name === 'ValidationError') {
+          return res.status(400).json({ error: 'Datos de la orden inválidos: ' + error.message });
+        }
+
         const esTransitorio = error.hasErrorLabel && error.hasErrorLabel('TransientTransactionError');
         intentos++;
         if (esTransitorio && intentos < MAX_INTENTOS_TRANSACCION) {
@@ -162,7 +167,7 @@ const obtenerOrdenes = async (req, res) => {
 
     res.json(ordenes);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener las órdenes de compra' });
+    manejarErrorMongo(error, res, 'Error al obtener las órdenes de compra');
   }
 };
 
@@ -203,7 +208,7 @@ const actualizarEstado = async (req, res) => {
 
     res.json(orden);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el estado de la orden' });
+    manejarErrorMongo(error, res, 'Error al actualizar el estado de la orden');
   }
 };
 
@@ -227,7 +232,7 @@ const notificarCambioEstado = async (req, res) => {
       res.status(500).json({ error: 'Error al enviar el correo de notificación' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error al procesar la notificación de cambio de estado' });
+    manejarErrorMongo(error, res, 'Error al procesar la notificación de cambio de estado');
   }
 };
 

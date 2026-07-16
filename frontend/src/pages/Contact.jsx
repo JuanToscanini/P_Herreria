@@ -1,22 +1,34 @@
 import { useState } from 'react'
+import { toast } from 'react-toastify'
+import api from '../api/axiosConfig'
 import './Contact.css'
 
 function Contact() {
   const [form, setForm] = useState({
     nombre: '',
     email: '',
+    telefono: '',
     mensaje: ''
   })
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Formulario enviado:', form)
-    alert('Mensaje enviado correctamente')
-    setForm({ nombre: '', email: '', mensaje: '' })
+
+    setLoading(true)
+    try {
+      await api.post('/contacto', form)
+      toast.success('Mensaje enviado correctamente')
+      setForm({ nombre: '', email: '', telefono: '', mensaje: '' })
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error al enviar el mensaje')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -52,6 +64,16 @@ function Contact() {
           />
         </div>
         <div className="form-group">
+          <label>Teléfono (opcional)</label>
+          <input
+            type="text"
+            name="telefono"
+            value={form.telefono}
+            onChange={handleChange}
+            placeholder="Tu teléfono"
+          />
+        </div>
+        <div className="form-group">
           <label>Mensaje</label>
           <textarea
             name="mensaje"
@@ -62,7 +84,9 @@ function Contact() {
             required
           />
         </div>
-        <button type="submit">Enviar mensaje</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Enviando...' : 'Enviar mensaje'}
+        </button>
       </form>
     </div>
   )

@@ -6,7 +6,7 @@ const transporter = nodemailer.createTransport({
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: process.env.SMTP_SECURE === 'true', // true para puerto 465, false para otros puertos
   auth: {
-    user: process.env.SMTP_EMAIL || '',
+    user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || ''
   }
 });
@@ -40,13 +40,13 @@ async function sendPasswordResetEmail(email, tokenReal) {
   console.log(`Enlace de restablecimiento: ${resetLink}`);
   console.log('==================================================\n');
 
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASS) {
-    console.log('⚠️ NOTA: SMTP_EMAIL o SMTP_PASS no configurados. Se simula envío exitoso.');
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log('⚠️ NOTA: SMTP_USER o SMTP_PASS no configurados. Se simula envío exitoso.');
     return { message: 'Mock email sent' };
   }
 
   const mailOptions = {
-    from: `"Herrería Ledesma" <${process.env.SMTP_EMAIL}>`,
+    from: `"Herrería Ledesma" <${process.env.MAIL_FROM || process.env.SMTP_USER}>`,
     to: email,
     subject: 'Recuperación de contraseña - Herrería Ledesma',
     html: `
@@ -76,8 +76,8 @@ async function sendOrderConfirmationEmail(email, orden) {
   console.log(`Total: ${formatCurrency(orden.total)}`);
   console.log('==================================================\n');
 
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASS) {
-    console.log('⚠️ NOTA: SMTP_EMAIL o SMTP_PASS no configurados. Se simula envío exitoso.');
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log('⚠️ NOTA: SMTP_USER o SMTP_PASS no configurados. Se simula envío exitoso.');
     return { message: 'Mock email sent' };
   }
 
@@ -110,7 +110,7 @@ async function sendOrderConfirmationEmail(email, orden) {
     : `<p><strong>Medio de pago:</strong> Efectivo en el local</p>`;
 
   const mailOptions = {
-    from: `"Herrería Ledesma" <${process.env.SMTP_EMAIL}>`,
+    from: `"Herrería Ledesma" <${process.env.MAIL_FROM || process.env.SMTP_USER}>`,
     to: email,
     subject: '¡Recibimos tu pedido! - Herrería Ledesma',
     html: `
@@ -201,13 +201,13 @@ async function sendOrderStatusUpdateEmail(email, orden) {
   console.log(`Estado de envío: ${orden.estadoEnvio}`);
   console.log('==================================================\n');
 
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASS) {
-    console.log('⚠️ NOTA: SMTP_EMAIL o SMTP_PASS no configurados. Se simula envío exitoso.');
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log('⚠️ NOTA: SMTP_USER o SMTP_PASS no configurados. Se simula envío exitoso.');
     return { message: 'Mock email sent' };
   }
 
   const mailOptions = {
-    from: `"Herrería Ledesma" <${process.env.SMTP_EMAIL}>`,
+    from: `"Herrería Ledesma" <${process.env.MAIL_FROM || process.env.SMTP_USER}>`,
     to: email,
     subject: `Actualización de tu pedido #${orden._id} - Herrería Ledesma`,
     html: `
@@ -239,10 +239,60 @@ async function sendOrderStatusUpdateEmail(email, orden) {
   return transporter.sendMail(mailOptions);
 }
 
+// 4. Envío de correo del formulario de contacto (siempre a la casilla propia, con replyTo del usuario)
+async function sendContactEmail({ nombre, email, telefono, mensaje }) {
+  if (!nombre || !email || !mensaje) {
+    throw new Error('sendContactEmail requiere nombre, email y mensaje');
+  }
+
+  const destinatario = process.env.CONTACT_EMAIL_TO || process.env.MAIL_FROM || process.env.SMTP_USER;
+
+  console.log('\n==================================================');
+  console.log('📧 [CORREO] NUEVO MENSAJE DE CONTACTO');
+  console.log(`De: ${nombre} <${email}>`);
+  console.log(`Teléfono: ${telefono || '(no informado)'}`);
+  console.log(`Mensaje: ${mensaje}`);
+  console.log('==================================================\n');
+
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log('⚠️ NOTA: SMTP_USER o SMTP_PASS no configurados. Se simula envío exitoso.');
+    return { message: 'Mock email sent' };
+  }
+
+  const mailOptions = {
+    from: `"Herrería Ledesma" <${process.env.MAIL_FROM || process.env.SMTP_USER}>`,
+    to: destinatario,
+    replyTo: email,
+    subject: `Nuevo mensaje de contacto - ${nombre}`,
+    text: [
+      `Nombre: ${nombre}`,
+      `Email: ${email}`,
+      telefono ? `Teléfono: ${telefono}` : null,
+      '',
+      'Mensaje:',
+      mensaje
+    ].filter(Boolean).join('\n'),
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+        <h2 style="color: #333; text-align: center;">Nuevo mensaje de contacto</h2>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p><strong>Nombre:</strong> ${escapeHtml(nombre)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        ${telefono ? `<p><strong>Teléfono:</strong> ${escapeHtml(telefono)}</p>` : ''}
+        <p><strong>Mensaje:</strong></p>
+        <p style="white-space: pre-wrap; background-color: #f8f9fa; padding: 15px; border-radius: 4px;">${escapeHtml(mensaje)}</p>
+      </div>
+    `
+  };
+
+  return transporter.sendMail(mailOptions);
+}
+
 module.exports = {
   sendPasswordResetEmail,
   sendOrderConfirmationEmail,
   sendOrderStatusUpdateEmail,
+  sendContactEmail,
   formatCurrency,
   escapeHtml
 };

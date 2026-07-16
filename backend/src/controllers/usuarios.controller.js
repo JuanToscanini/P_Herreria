@@ -97,7 +97,32 @@ const actualizarMiPerfil = async (req, res) => {
 // GET /api/usuarios
 const obtenerUsuarios = async (req, res) => {
   try {
-    const usuarios = await Usuario.find().select('-contrasena');
+    // Users.jsx solo pinta nombre/email/rol/activo (más _id, que Mongoose siempre
+    // incluye salvo que se excluya explícitamente). resetPasswordToken/Expires y
+    // carritoActivo no se usan en el listado y no hace falta exponerlos.
+    const consulta = Usuario.find().select('nombre email rol activo');
+
+    const { page, limit } = req.query;
+    // Igual que en productos: solo pagina si el cliente lo pide explícitamente,
+    // para no romper el contrato actual del frontend (que espera el array completo).
+    if (page !== undefined || limit !== undefined) {
+      const paginaActual = Math.max(parseInt(page) || 1, 1);
+      const limiteActual = Math.max(parseInt(limit) || 10, 1);
+      const total = await Usuario.countDocuments();
+
+      const usuarios = await consulta
+        .skip((paginaActual - 1) * limiteActual)
+        .limit(limiteActual);
+
+      res.set({
+        'X-Total-Count': total,
+        'X-Page': paginaActual,
+        'X-Total-Pages': Math.ceil(total / limiteActual)
+      });
+      return res.json(usuarios);
+    }
+
+    const usuarios = await consulta;
     res.json(usuarios);
   } catch (error) {
     manejarErrorMongo(error, res, 'Error al obtener los usuarios');

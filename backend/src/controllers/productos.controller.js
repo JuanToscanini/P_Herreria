@@ -5,7 +5,33 @@ const { manejarErrorMongo } = require('../utils/manejarErrorMongo');
 const obtenerProductos = async (req, res) => {
   try {
     const filtro = req.usuario?.rol === 'admin' ? {} : { activo: true };
-    const productos = await Producto.find(filtro);
+
+    // descripcion no se usa en el listado (ProductCard solo pinta nombre/categoria/precio/imagenes),
+    // se trae recién al pedir el detalle de un producto puntual.
+    const consulta = Producto.find(filtro).select('-descripcion');
+
+    const { page, limit } = req.query;
+    // La paginación solo se activa si el cliente la pide explícitamente (?page=/?limit=).
+    // Así el contrato actual del frontend (recibir el array completo) no cambia para nadie
+    // que todavía no la use.
+    if (page !== undefined || limit !== undefined) {
+      const paginaActual = Math.max(parseInt(page) || 1, 1);
+      const limiteActual = Math.max(parseInt(limit) || 10, 1);
+      const total = await Producto.countDocuments(filtro);
+
+      const productos = await consulta
+        .skip((paginaActual - 1) * limiteActual)
+        .limit(limiteActual);
+
+      res.set({
+        'X-Total-Count': total,
+        'X-Page': paginaActual,
+        'X-Total-Pages': Math.ceil(total / limiteActual)
+      });
+      return res.json(productos);
+    }
+
+    const productos = await consulta;
     res.json(productos);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener productos' });

@@ -11,7 +11,9 @@ const productoSchema = new mongoose.Schema({
     enum: ['parrilla', 'asador', 'rejilla', 'accesorio', 'otro']
   },
   imagenes: [{ type: String }],
-  activo: { type: Boolean, default: true }
+  // Indexado: obtenerProductos filtra por activo:true en cada request de un usuario
+  // no-admin, es el filtro más frecuente de todo el backend.
+  activo: { type: Boolean, default: true, index: true }
 }, { timestamps: true });
  
 module.exports = mongoose.model('Producto', productoSchema);

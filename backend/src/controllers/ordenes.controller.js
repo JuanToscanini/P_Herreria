@@ -153,18 +153,39 @@ const crearOrden = async (req, res) => {
 // GET /api/ordenes
 const obtenerOrdenes = async (req, res) => {
   try {
-    let query = {};
-    
+    const filtro = {};
+
     // Si no es admin, sólo mostramos sus propios pedidos
     if (req.usuario.rol !== 'admin') {
-      query.usuario = req.usuario.id;
+      filtro.usuario = req.usuario.id;
     }
 
-    const ordenes = await Orden.find(query)
+    const consulta = Orden.find(filtro)
       .populate('items.producto', 'nombre precio imagenes')
       .populate('usuario', 'nombre email')
       .sort({ createdAt: -1 });
 
+    const { page, limit } = req.query;
+    // Igual que en productos/usuarios: solo pagina si el cliente lo pide explícitamente,
+    // para no romper el contrato actual del frontend (que espera el array completo).
+    if (page !== undefined || limit !== undefined) {
+      const paginaActual = Math.max(parseInt(page) || 1, 1);
+      const limiteActual = Math.max(parseInt(limit) || 10, 1);
+      const total = await Orden.countDocuments(filtro);
+
+      const ordenes = await consulta
+        .skip((paginaActual - 1) * limiteActual)
+        .limit(limiteActual);
+
+      res.set({
+        'X-Total-Count': total,
+        'X-Page': paginaActual,
+        'X-Total-Pages': Math.ceil(total / limiteActual)
+      });
+      return res.json(ordenes);
+    }
+
+    const ordenes = await consulta;
     res.json(ordenes);
   } catch (error) {
     manejarErrorMongo(error, res, 'Error al obtener las órdenes de compra');

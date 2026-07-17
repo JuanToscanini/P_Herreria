@@ -1,0 +1,90 @@
+.checkout-result {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.checkout-result-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2.5rem;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+
+.checkout-result-icon {
+  font-size: 2.5rem;
+  width: 4rem;
+  height: 4rem;
+  line-height: 4rem;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+}
+
+.checkout-result-icon.ok {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.checkout-result-icon.warn {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.checkout-result-icon.fail {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.checkout-result-desc {
+  color: var(--text);
+  margin: 1rem 0;
+  line-height: 1.5;
+}
+
+.checkout-result-error {
+  color: #e74c3c;
+  margin: 1rem 0;
+}
+
+.checkout-result-order-id {
+  font-size: 0.9rem;
+  color: var(--text);
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}
+
+.checkout-result-order-id span {
+  font-family: monospace;
+}
+
+.checkout-result-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Estas páginas pueden abrirse directo (redirect de MercadoPago) sin haber
+   pasado por Cart.jsx, así que no dependemos de que Cart.css ya esté cargado. */
+.checkout-result-actions .btn-primary,
+.checkout-result-actions .btn-secondary {
+  padding: 0.7rem 1.4rem;
+  border-radius: 4px;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.checkout-result-actions .btn-primary {
+  background-color: #333;
+  color: white;
+}
+
+.checkout-result-actions .btn-secondary {
+  background-color: transparent;
+  color: var(--text-h);
+  border: 1px solid var(--border);
+}

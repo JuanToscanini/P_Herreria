@@ -20,6 +20,9 @@ import Cart from './pages/Cart'
 import Orders from './pages/Orders'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import CheckoutSuccess from './pages/CheckoutSuccess'
+import CheckoutFailure from './pages/CheckoutFailure'
+import CheckoutPending from './pages/CheckoutPending'
 
 import './App.css'
 
@@ -53,6 +56,9 @@ function App() {
 
             <Route path="/contacto" element={<Contact />} />
             <Route path="/carrito" element={<Cart />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/checkout/failure" element={<CheckoutFailure />} />
+            <Route path="/checkout/pending" element={<CheckoutPending />} />
             <Route path="/pedidos" element={<Orders />} />
             <Route path="/usuarios" element={<Users />} />
             <Route path="/usuarios/editar/:id" element={<EditUser />} />

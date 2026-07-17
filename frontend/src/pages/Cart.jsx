@@ -101,7 +101,28 @@ function Cart() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setPedidoCreado(response.data);
+      const ordenCreada = response.data;
+
+      if (medioPago === 'mercadopago') {
+        try {
+          const prefResponse = await api.post(`/ordenes/${ordenCreada._id}/preferencia-pago`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          clearCart();
+          // Redirect completo al Checkout Pro de MercadoPago, salimos de la SPA.
+          window.location.href = prefResponse.data.init_point;
+          return;
+        } catch (prefErr) {
+          // La orden ya se creó (con su stock reservado) aunque no se pudo iniciar
+          // el pago; mostramos igual el resumen para que el usuario no la pierda.
+          toast.error(prefErr.response?.data?.error || 'No se pudo iniciar el pago con MercadoPago');
+          setPedidoCreado(ordenCreada);
+          clearCart();
+          return;
+        }
+      }
+
+      setPedidoCreado(ordenCreada);
       clearCart();
       toast.success('¡Pedido realizado con éxito!');
     } catch (err) {
@@ -392,11 +413,25 @@ function Cart() {
                     />
                     <span>Transferencia bancaria</span>
                   </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="medioPago"
+                      value="mercadopago"
+                      checked={medioPago === 'mercadopago'}
+                      onChange={() => setMedioPago('mercadopago')}
+                    />
+                    <span>MercadoPago</span>
+                  </label>
                 </div>
               </div>
 
               <button type="submit" className="btn-primary btn-checkout-submit" disabled={loading}>
-                {loading ? 'Procesando...' : 'Realizar pedido'}
+                {loading
+                  ? 'Procesando...'
+                  : medioPago === 'mercadopago'
+                    ? 'Pagar con MercadoPago'
+                    : 'Realizar pedido'}
               </button>
             </form>
           )}

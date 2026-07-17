@@ -22,7 +22,7 @@ const ordenSchema = new mongoose.Schema({
     direccion: { type: String, default: '' },
     telefono: { type: String, default: '' }
   },
-  medioPago: { type: String, enum: ['transferencia', 'efectivo'], required: true },
+  medioPago: { type: String, enum: ['transferencia', 'efectivo', 'mercadopago'], required: true },
   estadoPago: {
     type: String,
     enum: ['pendiente de pago', 'pago confirmado', 'cancelado'],
@@ -32,7 +32,18 @@ const ordenSchema = new mongoose.Schema({
     type: String,
     enum: ['pendiente', 'enviado', 'listo para retiro', 'entregado'],
     default: 'pendiente'
-  }
+  },
+  // Estado del pago según MercadoPago, actualizado por el webhook de notificaciones.
+  // Separado del estadoPago existente (que refleja la decisión manual del admin
+  // para transferencia/efectivo) para no pisar ese flujo ya probado.
+  estadoPagoMP: {
+    type: String,
+    enum: ['pendiente', 'aprobado', 'rechazado', 'en_proceso'],
+    default: 'pendiente'
+  },
+  mercadopagoPreferenceId: { type: String },
+  mercadopagoPaymentId: { type: String },
+  fechaPago: { type: Date }
 }, { timestamps: true });
 
 // Cubre la consulta de un cliente viendo "Mis pedidos": filtra por usuario y

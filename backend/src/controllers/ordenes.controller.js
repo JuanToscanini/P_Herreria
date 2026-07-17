@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+const { Preference } = require('mercadopago');
 const Orden = require('../models/orden.model');
 const Producto = require('../models/producto.model');
 const Usuario = require('../models/usuario.model');
 const { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } = require('../config/mailer');
+const { mercadopago } = require('../config/mercadopago');
 const { manejarErrorMongo } = require('../utils/manejarErrorMongo');
 
 // Error controlado: permite abortar la transacción y devolver un status/mensaje
@@ -192,6 +194,27 @@ const obtenerOrdenes = async (req, res) => {
   }
 };
 
+// GET /api/ordenes/:id
+const obtenerOrdenPorId = async (req, res) => {
+  try {
+    const orden = await Orden.findById(req.params.id)
+      .populate('items.producto', 'nombre precio imagenes')
+      .populate('usuario', 'nombre email');
+
+    if (!orden) {
+      return res.status(404).json({ error: 'Orden no encontrada' });
+    }
+
+    if (orden.usuario._id.toString() !== req.usuario.id && req.usuario.rol !== 'admin') {
+      return res.status(403).json({ error: 'No tenés permiso para ver esta orden' });
+    }
+
+    res.json(orden);
+  } catch (error) {
+    manejarErrorMongo(error, res, 'Error al buscar la orden');
+  }
+};
+
 // PATCH /api/ordenes/:id
 const ESTADOS_PAGO_PERMITIDOS = ['pendiente de pago', 'pago confirmado', 'cancelado'];
 const ESTADOS_ENVIO_PERMITIDOS = ['pendiente', 'enviado', 'entregado'];
@@ -233,6 +256,50 @@ const actualizarEstado = async (req, res) => {
   }
 };
 
+// POST /api/ordenes/:id/preferencia-pago
+const crearPreferenciaPago = async (req, res) => {
+  try {
+    const orden = await Orden.findById(req.params.id).populate('items.producto', 'nombre');
+    if (!orden) {
+      return res.status(404).json({ error: 'Orden no encontrada' });
+    }
+
+    if (orden.usuario.toString() !== req.usuario.id && req.usuario.rol !== 'admin') {
+      return res.status(403).json({ error: 'No tenés permiso para pagar esta orden' });
+    }
+
+    const items = orden.items.map((item) => ({
+      title: item.producto?.nombre || 'Producto',
+      quantity: item.cantidad,
+      unit_price: item.precioEnElMomento,
+      currency_id: 'ARS'
+    }));
+
+    const preference = new Preference(mercadopago);
+    const resultado = await preference.create({
+      body: {
+        items,
+        back_urls: {
+          success: `${process.env.FRONTEND_URL}/checkout/success`,
+          failure: `${process.env.FRONTEND_URL}/checkout/failure`,
+          pending: `${process.env.FRONTEND_URL}/checkout/pending`
+        },
+        auto_return: 'approved',
+        notification_url: `${process.env.BACKEND_URL}/api/pagos/notificaciones`,
+        external_reference: orden._id.toString()
+      }
+    });
+
+    orden.mercadopagoPreferenceId = resultado.id;
+    await orden.save();
+
+    res.json({ init_point: resultado.init_point });
+  } catch (error) {
+    console.error('Error al crear la preferencia de pago:', error);
+    manejarErrorMongo(error, res, 'Error al crear la preferencia de pago');
+  }
+};
+
 // POST /api/ordenes/:id/notificaciones
 const notificarCambioEstado = async (req, res) => {
   try {
@@ -260,6 +327,8 @@ const notificarCambioEstado = async (req, res) => {
 module.exports = {
   crearOrden,
   obtenerOrdenes,
+  obtenerOrdenPorId,
   actualizarEstado,
+  crearPreferenciaPago,
   notificarCambioEstado
 };

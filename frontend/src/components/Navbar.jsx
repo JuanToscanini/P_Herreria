@@ -5,6 +5,14 @@ import { useCart } from '../context/CartContext'
 import { getRol } from '../utils/auth'
 import './Navbar.css'
 
+const CATEGORIAS_PRODUCTOS = [
+  { valor: 'parrilla', etiqueta: 'Parrillas' },
+  { valor: 'asador', etiqueta: 'Asadores' },
+  { valor: 'rejilla', etiqueta: 'Rejillas' },
+  { valor: 'accesorio', etiqueta: 'Accesorios' },
+  { valor: 'otro', etiqueta: 'Otros' }
+]
+
 function Navbar({ titulo, links }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -50,8 +58,17 @@ function Navbar({ titulo, links }) {
 
       <ul className="navbar-links">
         {links.map((link, index) => (
-          <li key={index}>
+          <li key={index} className={link.ruta === '/productos' ? 'navbar-item-productos' : undefined}>
             <Link to={link.ruta}>{link.nombre}</Link>
+            {link.ruta === '/productos' && (
+              <div className="navbar-submenu">
+                {CATEGORIAS_PRODUCTOS.map(cat => (
+                  <Link key={cat.valor} to={`/productos?categoria=${cat.valor}`}>
+                    {cat.etiqueta}
+                  </Link>
+                ))}
+              </div>
+            )}
           </li>
         ))}
         {getRol() === 'admin' && (

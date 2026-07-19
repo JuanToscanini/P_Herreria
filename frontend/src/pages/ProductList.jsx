@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import api from '../api/axiosConfig'
 import { getRol, getToken } from '../utils/auth'
@@ -9,11 +9,14 @@ import Spinner from '../components/Spinner'
 
 function ProductList() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [productos, setProductos] = useState([])
   const [inactivos, setInactivos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [busqueda, setBusqueda] = useState('')
   const esAdmin = getRol() === 'admin'
+  const categoriaFiltro = searchParams.get('categoria')
 
   useEffect(() => {
     fetchProductos()
@@ -45,13 +48,25 @@ function ProductList() {
     }
   }
 
+  const productosFiltrados = productos.filter(p => {
+    const coincideNombre = p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    const coincideCategoria = !categoriaFiltro || p.categoria === categoriaFiltro
+    return coincideNombre && coincideCategoria
+  })
+
   if (loading) return <Spinner mensaje="Cargando productos..." />
   if (error) return <Spinner mensaje="Error al cargar los productos" />
 
   return (
     <div className="product-list">
       <div className="product-list-header">
-        <h1>Productos</h1>
+        <input
+          type="text"
+          className="product-search-input"
+          placeholder="Buscar producto..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
         {esAdmin && (
           <button onClick={() => navigate('/productos/nuevo')}>
             Nuevo producto
@@ -60,7 +75,7 @@ function ProductList() {
       </div>
 
       <div className="products-grid">
-        {productos.map(producto => (
+        {productosFiltrados.map(producto => (
           <ProductCard
             key={producto._id}
             id={producto._id}
@@ -71,6 +86,10 @@ function ProductList() {
           />
         ))}
       </div>
+
+      {productosFiltrados.length === 0 && (
+        <p className="products-empty">No se encontraron productos</p>
+      )}
 
       {esAdmin && inactivos.length > 0 && (
         <div className="productos-inactivos">

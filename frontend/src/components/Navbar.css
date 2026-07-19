@@ -117,8 +117,8 @@
   position: absolute;
   right: 0;
   top: 2rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background-color: #333;
+  border: 1px solid #444;
   border-radius: 4px;
   padding: 0.75rem;
   min-width: 160px;
@@ -130,21 +130,21 @@
 
 .dropdown-nombre {
   font-size: 0.85rem;
-  color: var(--text);
+  color: white;
   opacity: 0.8;
   margin: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #444;
   padding-bottom: 0.5rem;
 }
 
 .navbar-dropdown a {
-  color: var(--text-h);
+  color: white;
   text-decoration: none;
   font-size: 0.9rem;
 }
 
 .navbar-dropdown a:hover {
-  color: var(--accent);
+  color: #ddd;
 }
 
 .navbar-dropdown button {

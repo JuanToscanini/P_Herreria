@@ -35,7 +35,8 @@ function ProductDetail() {
       nombre: producto.nombre,
       categoria: producto.categoria,
       precio: producto.precio,
-      imagenes: producto.imagenes
+      imagenes: producto.imagenes,
+      stock: producto.stock
     })
     toast.success('Producto agregado al carrito')
   }

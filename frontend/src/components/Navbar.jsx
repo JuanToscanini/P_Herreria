@@ -2,7 +2,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { FiShoppingCart } from 'react-icons/fi'
 import { useCart } from '../context/CartContext'
-import { getRol } from '../utils/auth'
+import { getRol, getToken } from '../utils/auth'
+import api from '../api/axiosConfig'
 import './Navbar.css'
 
 const CATEGORIAS_PRODUCTOS = [
@@ -19,12 +20,27 @@ function Navbar({ titulo, links }) {
   const [usuario, setUsuario] = useState(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [menuMobileAbierto, setMenuMobileAbierto] = useState(false)
+  const [tienePedidos, setTienePedidos] = useState(false)
   const { cartQuantity } = useCart()
 
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem('usuario')
     setUsuario(usuarioGuardado ? JSON.parse(usuarioGuardado) : null)
   }, [location.pathname])
+
+  // "Mis pedidos" solo debe verse si el cliente ya tiene al menos un pedido.
+  // Se consulta una sola vez por sesión de usuario (no en cada cambio de ruta).
+  useEffect(() => {
+    if (!usuario || usuario.rol === 'admin') {
+      setTienePedidos(false)
+      return
+    }
+
+    const token = getToken()
+    api.get('/ordenes', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setTienePedidos(res.data.length > 0))
+      .catch(() => setTienePedidos(false))
+  }, [usuario?.id])
 
   useEffect(() => {
     if (!menuMobileAbierto) return
@@ -74,7 +90,7 @@ function Navbar({ titulo, links }) {
         {getRol() === 'admin' && (
           <li><Link to="/usuarios">Usuarios</Link></li>
         )}
-        {usuario && (
+        {usuario && (usuario.rol === 'admin' || tienePedidos) && (
           <li>
             <Link to="/pedidos">
               {usuario.rol === 'admin' ? 'Pedidos' : 'Mis pedidos'}
@@ -138,7 +154,7 @@ function Navbar({ titulo, links }) {
           {getRol() === 'admin' && (
             <li><Link to="/usuarios" onClick={cerrarMenuMobile}>Usuarios</Link></li>
           )}
-          {usuario && (
+          {usuario && (usuario.rol === 'admin' || tienePedidos) && (
             <li>
               <Link to="/pedidos" onClick={cerrarMenuMobile}>
                 {usuario.rol === 'admin' ? 'Pedidos' : 'Mis pedidos'}

@@ -12,6 +12,8 @@
   margin: 1rem 0;
 }
 .detail-back {
+  display: block;
+  margin-right: auto;
   background: none;
   border: 1px solid var(--border);
   padding: 0.5rem 1rem;

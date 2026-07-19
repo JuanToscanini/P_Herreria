@@ -275,16 +275,25 @@ const crearPreferenciaPago = async (req, res) => {
       currency_id: 'ARS'
     }));
 
+    const successUrl = `${process.env.FRONTEND_URL}/checkout/success`;
+
+    // MercadoPago rechaza auto_return si back_url.success no es una URL pública
+    // (no acepta localhost/127.0.0.1). En desarrollo local lo omitimos: el usuario
+    // vuelve haciendo clic en el botón de la propia página de MercadoPago en vez
+    // de ser redirigido automáticamente. En un dominio real (producción o frontend
+    // ya expuesto por túnel) esto se activa solo.
+    const esUrlPublica = !/localhost|127\.0\.0\.1/.test(successUrl);
+
     const preference = new Preference(mercadopago);
     const resultado = await preference.create({
       body: {
         items,
         back_urls: {
-          success: `${process.env.FRONTEND_URL}/checkout/success`,
+          success: successUrl,
           failure: `${process.env.FRONTEND_URL}/checkout/failure`,
           pending: `${process.env.FRONTEND_URL}/checkout/pending`
         },
-        auto_return: 'approved',
+        ...(esUrlPublica ? { auto_return: 'approved' } : {}),
         notification_url: `${process.env.BACKEND_URL}/api/pagos/notificaciones`,
         external_reference: orden._id.toString()
       }

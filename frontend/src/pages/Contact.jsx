@@ -48,7 +48,7 @@ function Contact() {
             name="nombre"
             value={form.nombre}
             onChange={handleChange}
-            placeholder="Tu nombre"
+            placeholder="Nombre*"
             required
           />
         </div>
@@ -59,7 +59,7 @@ function Contact() {
             name="email"
             value={form.email}
             onChange={handleChange}
-            placeholder="Tu email"
+            placeholder="Email*"
             required
           />
         </div>
@@ -70,7 +70,7 @@ function Contact() {
             name="telefono"
             value={form.telefono}
             onChange={handleChange}
-            placeholder="Tu teléfono"
+            placeholder="Teléfono"
           />
         </div>
         <div className="form-group">

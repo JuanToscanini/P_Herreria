@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import FeaturedProducts from '../components/FeaturedProducts'
 import './Home.css'
 
 function Home() {
@@ -10,6 +11,8 @@ function Home() {
         <p className="home-descripcion">Fabricación artesanal con más de 20 años de experiencia en el rubro.</p>
         <Link to="/productos" className="home-btn">Ver productos</Link>
       </div>
+
+      <FeaturedProducts />
 
       <div className="home-stats">
         <div className="home-stat">

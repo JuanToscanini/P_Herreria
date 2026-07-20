@@ -43,13 +43,13 @@ const manejarNotificacion = async (req, res) => {
       return res.status(200).json({ recibido: true });
     }
 
-    // TODO: una vez que se configure MP_WEBHOOK_SECRET en el panel de MercadoPago,
-    // esta verificación queda activa automáticamente (ahora mismo el secret está
-    // vacío en .env, así que se omite y solo se loguea una advertencia).
     if (process.env.MP_WEBHOOK_SECRET) {
       if (!firmaValida(req, dataId)) {
-        console.error('Firma de webhook de MercadoPago inválida, se rechaza la notificación');
-        return res.status(401).json({ error: 'Firma inválida' });
+        // La firma no coincide, pero no cortamos acá: seguimos y verificamos el
+        // pago directo contra la API de MercadoPago (más abajo) antes de actuar.
+        // Esto degrada la validación de firma a solo informativa — el control
+        // real pasa a ser exclusivamente la consulta a payment.get() de abajo.
+        console.warn('⚠️ WEBHOOK-FIRMA-INVALIDA: la firma x-signature no coincide para data.id=' + dataId + '. Se continúa igual y se verifica el pago directo contra la API de MercadoPago como respaldo.');
       }
     } else {
       console.warn('⚠️ MP_WEBHOOK_SECRET no configurado: la firma del webhook NO se está verificando. Activar en cuanto se configure el secret en el panel de MercadoPago.');

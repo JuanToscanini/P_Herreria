@@ -91,6 +91,34 @@
   background: #f0f0f0;
 }
 
+.productos-inactivos-acciones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-eliminar-permanente {
+  padding: 0.35rem 0.8rem;
+  background: #e74c3c;
+  color: white;
+  border: 1px solid #c0392b;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-eliminar-permanente:hover {
+  background: #c0392b;
+}
+
+.btn-eliminar-permanente:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

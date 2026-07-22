@@ -7,6 +7,7 @@ const {
   obtenerProductoPorId,
   crearProducto,
   eliminarProducto,
+  eliminarProductoPermanente,
   actualizarProducto
 } = require('../controllers/productos.controller');
 
@@ -16,7 +17,8 @@ router.get('/:id', obtenerProductoPorId);
 
 // rutas protegidas - solo admin
 router.post('/', verificarToken, soloAdmin, crearProducto);
-router.delete('/:id', verificarToken, soloAdmin, eliminarProducto); 
+router.delete('/:id/permanente', verificarToken, soloAdmin, eliminarProductoPermanente);
+router.delete('/:id', verificarToken, soloAdmin, eliminarProducto);
 router.put('/:id', verificarToken, soloAdmin, actualizarProducto);
 
 module.exports = router;

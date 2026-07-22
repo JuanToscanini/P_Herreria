@@ -1,4 +1,5 @@
 const Producto = require('../models/producto.model');
+const Orden = require('../models/orden.model');
 const { manejarErrorMongo } = require('../utils/manejarErrorMongo');
 
 // GET /api/productos
@@ -103,11 +104,36 @@ const eliminarProducto = async (req, res) => {
   }
 };
 
+// DELETE /api/productos/:id/permanente
+// Borrado físico del documento. A diferencia de eliminarProducto (soft-delete),
+// esto rompe la referencia items.producto de cualquier orden que lo haya comprado,
+// así que se bloquea si el producto figura en al menos una orden existente.
+const eliminarProductoPermanente = async (req, res) => {
+  try {
+    const producto = await Producto.findById(req.params.id);
+    if (!producto) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    const tieneOrdenes = await Orden.exists({ 'items.producto': req.params.id });
+    if (tieneOrdenes) {
+      return res.status(409).json({
+        error: `No se puede eliminar definitivamente: el producto "${producto.nombre}" tiene órdenes asociadas.`
+      });
+    }
+
+    await Producto.findByIdAndDelete(req.params.id);
+    res.json({ mensaje: 'Producto eliminado definitivamente' });
+  } catch (error) {
+    manejarErrorMongo(error, res, 'Error al eliminar definitivamente el producto');
+  }
+};
+
 module.exports = {
   obtenerProductos,
   obtenerProductoPorId,
   crearProducto,
   actualizarProducto,
-  eliminarProducto
-}
-;
+  eliminarProducto,
+  eliminarProductoPermanente
+};

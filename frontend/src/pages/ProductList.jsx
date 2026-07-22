@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import ProductCard from '../components/ProductCard'
 import api from '../api/axiosConfig'
 import { getRol, getToken } from '../utils/auth'
@@ -15,6 +16,7 @@ function ProductList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
+  const [eliminandoId, setEliminandoId] = useState(null)
   const esAdmin = getRol() === 'admin'
   const categoriaFiltro = searchParams.get('categoria')
 
@@ -45,6 +47,27 @@ function ProductList() {
       fetchProductos()
     } catch (err) {
       setError('Error al reactivar el producto')
+    }
+  }
+
+  const eliminarProductoPermanente = async (id, nombre) => {
+    const confirmado = window.confirm(
+      `⚠️ Esta acción es IRREVERSIBLE y borra "${nombre}" de la base de datos de forma permanente. ¿Confirmás?`
+    )
+    if (!confirmado) return
+
+    setEliminandoId(id)
+    try {
+      const token = getToken()
+      await api.delete(`/productos/${id}/permanente`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      toast.success('Producto eliminado definitivamente')
+      fetchProductos()
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error al eliminar definitivamente el producto')
+    } finally {
+      setEliminandoId(null)
     }
   }
 
@@ -101,7 +124,7 @@ function ProductList() {
                   <th>Nombre</th>
                   <th>Categoría</th>
                   <th>Precio</th>
-                  <th>Reactivar</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -110,12 +133,19 @@ function ProductList() {
                     <td>{producto.nombre}</td>
                     <td>{producto.categoria}</td>
                     <td>${producto.precio}</td>
-                    <td>
+                    <td className="productos-inactivos-acciones">
                       <button
                         className="btn-reactivar"
                         onClick={() => reactivarProducto(producto._id)}
                       >
                         Reactivar
+                      </button>
+                      <button
+                        className="btn-eliminar-permanente"
+                        onClick={() => eliminarProductoPermanente(producto._id, producto.nombre)}
+                        disabled={eliminandoId === producto._id}
+                      >
+                        {eliminandoId === producto._id ? 'Eliminando...' : '⚠️ Eliminar definitivamente'}
                       </button>
                     </td>
                   </tr>

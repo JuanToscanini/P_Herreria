@@ -11,6 +11,7 @@ function EditProduct() {
   const { id } = useParams()
   const [loading, setLoading] = useState(true)
   const [loadingForm, setLoadingForm] = useState(false)
+  const [loadingEliminar, setLoadingEliminar] = useState(false)
   const [form, setForm] = useState({
     nombre: '',
     descripcion: '',
@@ -67,6 +68,31 @@ function EditProduct() {
     }
   }
 
+  const handleEliminar = async () => {
+    const stockActual = Number(form.stock) || 0
+    const mensaje = stockActual > 0
+      ? `Este producto todavía tiene ${stockActual} unidades en stock. ¿Seguro que querés eliminarlo?`
+      : '¿Seguro que querés eliminar este producto?'
+
+    if (!window.confirm(mensaje)) {
+      return
+    }
+
+    setLoadingEliminar(true)
+    try {
+      const token = getToken()
+      await api.delete(`/productos/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      toast.success('Producto eliminado correctamente')
+      navigate('/productos')
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error al eliminar el producto')
+    } finally {
+      setLoadingEliminar(false)
+    }
+  }
+
   if (loading) return <Spinner mensaje="Cargando producto..." />
 
   return (
@@ -120,14 +146,25 @@ function EditProduct() {
             />
           </div>
           <div className="edit-product-actions">
-            <button type="button" onClick={() => navigate('/productos')} className="btn-cancelar">
+            <button type="button" onClick={() => navigate('/productos')} className="btn-cancelar" disabled={loadingEliminar}>
               Cancelar
             </button>
-            <button type="submit" disabled={loadingForm}>
+            <button type="submit" disabled={loadingForm || loadingEliminar}>
               {loadingForm ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>
         </form>
+
+        <div className="edit-product-danger-zone">
+          <button
+            type="button"
+            className="btn-eliminar"
+            onClick={handleEliminar}
+            disabled={loadingEliminar || loadingForm}
+          >
+            {loadingEliminar ? 'Eliminando...' : 'Eliminar producto'}
+          </button>
+        </div>
       </div>
     </div>
   )

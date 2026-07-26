@@ -7,8 +7,12 @@ const {
   obtenerOrdenPorId,
   actualizarEstado,
   crearPreferenciaPago,
-  notificarCambioEstado
+  notificarCambioEstado,
+  expirarOrdenesPendientes
 } = require('../controllers/ordenes.controller');
+
+// Debe ir antes de las rutas con /:id para que Express no la trate como un id
+router.post('/expirar-pendientes', verificarToken, soloAdmin, expirarOrdenesPendientes);
 
 // Rutas protegidas (usuario logueado)
 router.post('/', verificarToken, crearOrden);

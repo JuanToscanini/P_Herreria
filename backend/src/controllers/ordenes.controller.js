@@ -18,6 +18,43 @@ class ErrorOrden extends Error {
 
 const MAX_INTENTOS_TRANSACCION = 3;
 
+// Cancela una orden y devuelve el stock de todos sus ítems en una transacción
+// atómica con retry en TransientTransactionError. Idempotente: si la orden ya
+// estaba en 'cancelado' no toca nada y devuelve false.
+async function cancelarOrdenYDevolverStock(orden) {
+  if (orden.estadoPago === 'cancelado') return false;
+
+  let intentos = 0;
+  while (true) {
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      for (const item of orden.items) {
+        await Producto.findByIdAndUpdate(
+          item.producto,
+          { $inc: { stock: item.cantidad } },
+          { session }
+        );
+      }
+
+      orden.estadoPago = 'cancelado';
+      await orden.save({ session });
+
+      await session.commitTransaction();
+      return true;
+    } catch (error) {
+      await session.abortTransaction().catch(() => {});
+      const esTransitorio = error.hasErrorLabel && error.hasErrorLabel('TransientTransactionError');
+      intentos++;
+      if (esTransitorio && intentos < MAX_INTENTOS_TRANSACCION) continue;
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+}
+
 // POST /api/ordenes
 const crearOrden = async (req, res) => {
   try {
@@ -233,11 +270,8 @@ const actualizarEstado = async (req, res) => {
       return res.status(404).json({ error: 'Orden no encontrada' });
     }
 
-    if (estadoPago !== undefined) {
-      if (!ESTADOS_PAGO_PERMITIDOS.includes(estadoPago)) {
-        return res.status(400).json({ error: `El estado de pago "${estadoPago}" no es válido.` });
-      }
-      orden.estadoPago = estadoPago;
+    if (estadoPago !== undefined && !ESTADOS_PAGO_PERMITIDOS.includes(estadoPago)) {
+      return res.status(400).json({ error: `El estado de pago "${estadoPago}" no es válido.` });
     }
 
     if (estadoEnvio !== undefined) {
@@ -245,14 +279,57 @@ const actualizarEstado = async (req, res) => {
       if (!estadosValidos.includes(estadoEnvio)) {
         return res.status(400).json({ error: `El estado de envío "${estadoEnvio}" no es válido para este tipo de entrega.` });
       }
-      orden.estadoEnvio = estadoEnvio;
     }
 
-    await orden.save();
+    const debeCancelar = estadoPago === 'cancelado' && orden.estadoPago !== 'cancelado';
+
+    if (debeCancelar) {
+      await cancelarOrdenYDevolverStock(orden);
+      if (estadoEnvio !== undefined) {
+        orden.estadoEnvio = estadoEnvio;
+        await orden.save();
+      }
+    } else {
+      if (estadoPago !== undefined) orden.estadoPago = estadoPago;
+      if (estadoEnvio !== undefined) orden.estadoEnvio = estadoEnvio;
+      await orden.save();
+    }
 
     res.json(orden);
   } catch (error) {
     manejarErrorMongo(error, res, 'Error al actualizar el estado de la orden');
+  }
+};
+
+// POST /api/ordenes/expirar-pendientes (solo admin)
+const expirarOrdenesPendientes = async (req, res) => {
+  try {
+    const minutos = parseInt(process.env.ORDEN_EXPIRACION_MINUTOS) || 60;
+    const limite = new Date(Date.now() - minutos * 60 * 1000);
+
+    const ordenes = await Orden.find({
+      medioPago: 'mercadopago',
+      estadoPago: 'pendiente de pago',
+      estadoPagoMP: { $in: ['pendiente', 'en_proceso'] },
+      createdAt: { $lt: limite }
+    });
+
+    let canceladas = 0;
+    let errores = 0;
+
+    for (const orden of ordenes) {
+      try {
+        await cancelarOrdenYDevolverStock(orden);
+        canceladas++;
+      } catch (error) {
+        console.error(`Error al expirar orden ${orden._id}:`, error);
+        errores++;
+      }
+    }
+
+    res.json({ total: ordenes.length, canceladas, errores, umbralMinutos: minutos });
+  } catch (error) {
+    manejarErrorMongo(error, res, 'Error al expirar órdenes pendientes');
   }
 };
 
@@ -339,5 +416,6 @@ module.exports = {
   obtenerOrdenPorId,
   actualizarEstado,
   crearPreferenciaPago,
-  notificarCambioEstado
+  notificarCambioEstado,
+  expirarOrdenesPendientes
 };

@@ -301,33 +301,39 @@ const actualizarEstado = async (req, res) => {
   }
 };
 
+// Lógica pura de expiración — sin req/res, usable desde el endpoint HTTP y el cron job.
+async function expirarOrdenesPendientesJob() {
+  const minutos = parseInt(process.env.ORDEN_EXPIRACION_MINUTOS) || 15;
+  const limite = new Date(Date.now() - minutos * 60 * 1000);
+
+  const ordenes = await Orden.find({
+    medioPago: 'mercadopago',
+    estadoPago: 'pendiente de pago',
+    estadoPagoMP: { $in: ['pendiente', 'en_proceso'] },
+    createdAt: { $lt: limite }
+  });
+
+  let canceladas = 0;
+  let errores = 0;
+
+  for (const orden of ordenes) {
+    try {
+      await cancelarOrdenYDevolverStock(orden);
+      canceladas++;
+    } catch (error) {
+      console.error(`Error al expirar orden ${orden._id}:`, error);
+      errores++;
+    }
+  }
+
+  return { total: ordenes.length, canceladas, errores, umbralMinutos: minutos };
+}
+
 // POST /api/ordenes/expirar-pendientes (solo admin)
 const expirarOrdenesPendientes = async (req, res) => {
   try {
-    const minutos = parseInt(process.env.ORDEN_EXPIRACION_MINUTOS) || 60;
-    const limite = new Date(Date.now() - minutos * 60 * 1000);
-
-    const ordenes = await Orden.find({
-      medioPago: 'mercadopago',
-      estadoPago: 'pendiente de pago',
-      estadoPagoMP: { $in: ['pendiente', 'en_proceso'] },
-      createdAt: { $lt: limite }
-    });
-
-    let canceladas = 0;
-    let errores = 0;
-
-    for (const orden of ordenes) {
-      try {
-        await cancelarOrdenYDevolverStock(orden);
-        canceladas++;
-      } catch (error) {
-        console.error(`Error al expirar orden ${orden._id}:`, error);
-        errores++;
-      }
-    }
-
-    res.json({ total: ordenes.length, canceladas, errores, umbralMinutos: minutos });
+    const resultado = await expirarOrdenesPendientesJob();
+    res.json(resultado);
   } catch (error) {
     manejarErrorMongo(error, res, 'Error al expirar órdenes pendientes');
   }
@@ -417,5 +423,6 @@ module.exports = {
   actualizarEstado,
   crearPreferenciaPago,
   notificarCambioEstado,
-  expirarOrdenesPendientes
+  expirarOrdenesPendientes,
+  expirarOrdenesPendientesJob
 };

@@ -1,4 +1,10 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
+// Fuerza IPv4 en toda resolución DNS del proceso. Render (plan free) no tiene
+// salida IPv6 confiable hacia Gmail, lo que causa ENETUNREACH/ETIMEDOUT en SMTP.
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 const connectDB = require('./config/database');
 const app = require('./app');
 const cron = require('node-cron');
